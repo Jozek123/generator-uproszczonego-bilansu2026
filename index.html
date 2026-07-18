@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Bilans Uproszczony - Generator</title>
+    <!-- Ładowanie środowiska PyScript -->
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f9f9f9; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .input-section { margin-bottom: 20px; padding: 15px; background: #eef; border-radius: 5px; }
+        .input-group { margin-bottom: 10px; }
+        select, input { padding: 5px; width: 300px; max-width: 100%; }
+        button { padding: 8px 15px; background-color: #0056b3; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #004494; }
+        .delete-btn { background-color: #dc3545; padding: 3px 8px; margin-left: 10px; font-size: 0.9em; }
+        .delete-btn:hover { background-color: #c82333; }
+        
+        /* Stylizacja tabeli bilansu */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9em; }
+        th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+        th { background-color: #ddd; text-align: center; }
+        .section-header { font-weight: bold; background-color: #eaeaea; }
+        .main-total { font-weight: bold; font-size: 1.1em; background-color: #ccc; }
+        ul { list-style-type: none; padding-left: 0; }
+        li { padding: 5px 0; border-bottom: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 style="text-align: center;">Generator Bilansu (uproszczonego)</h2>
+        
+        <div class="input-section">
+            <div class="input-group">
+                <label>Kwota (PLN): <input type="number" id="amount" step="0.01" placeholder="np. 1500.50"></label>
+            </div>
+            <div class="input-group">
+                <label>Z klasyfikuj do pozycji: <br>
+                    <select id="category">
+                        <optgroup label="AKTYWA - A. Aktywa trwałe">
+                            <option value="ak_a_i">A.I. Wartości niematerialne i prawne</option>
+                            <option value="ak_a_ii">A.II. Rzeczowe aktywa trwałe</option>
+                            <option value="ak_a_iii">A.III. Należności długoterminowe</option>
+                            <option value="ak_a_iv">A.IV. Inwestycje długoterminowe</option>
+                            <option value="ak_a_v">A.V. Długoterminowe rozliczenia międzyokresowe</option>
+                        </optgroup>
+                        <optgroup label="AKTYWA - B. Aktywa obrotowe">
+                            <option value="ak_b_i">B.I. Zapasy</option>
+                            <option value="ak_b_ii">B.II. Należności krótkoterminowe</option>
+                            <option value="ak_b_iii">B.III. Inwestycje krótkoterminowe</option>
+                            <option value="ak_b_iv">B.IV. Krótkoterminowe rozliczenia międzyokresowe</option>
+                        </optgroup>
+                        <optgroup label="AKTYWA - Pozostałe">
+                            <option value="ak_c">C. Należne wpłaty na kapitał (fundusz) podstawowy</option>
+                            <option value="ak_d">D. Udziały (akcje) własne</option>
+                        </optgroup>
+                        <optgroup label="PASYWA - A. Kapitał (fundusz) własny">
+                            <option value="pa_a_i">A.I. Kapitał (fundusz) podstawowy</option>
+                            <option value="pa_a_ii">A.II. Kapitał (fundusz) zapasowy</option>
+                            <option value="pa_a_iii">A.III. Kapitał (fundusz) z aktualizacji wyceny</option>
+                            <option value="pa_a_iv">A.IV. Pozostałe kapitały (fundusze) rezerwowe</option>
+                            <option value="pa_a_v">A.V. Zysk (strata) z lat ubiegłych</option>
+                            <option value="pa_a_vi">A.VI. Zysk (strata) netto</option>
+                            <option value="pa_a_vii">A.VII. Odpisy z zysku netto w ciągu roku (wpisz z minusem!)</option>
+                        </optgroup>
+                        <optgroup label="PASYWA - B. Zobowiązania i rezerwy">
+                            <option value="pa_b_i">B.I. Rezerwy na zobowiązania</option>
+                            <option value="pa_b_ii">B.II. Zobowiązania długoterminowe</option>
+                            <option value="pa_b_iii">B.III. Zobowiązania krótkoterminowe</option>
+                            <option value="pa_b_iv">B.IV. Rozliczenia międzyokresowe</option>
+                        </optgroup>
+                    </select>
+                </label>
+            </div>
+            <button py-click="add_item">Dodaj składnik</button>
+        </div>
+
+        <h3>Wprowadzone składniki:</h3>
+        <ul id="items-list">Brak wprowadzonych składników.</ul>
+
+        <button py-click="generate_balance" style="width: 100%; font-size: 1.1em; margin-top: 10px;">GENERUJ BILANS</button>
+
+        <div id="bilans-output"></div>
+    </div>
+
+    <!-- Kod Pythona ukryty w znaczniku script -->
+    <script type="py">
+        import js
+        
+        # Lista przechowująca dodane składniki
+        data_store = []
+
+        # Funkcja usuwająca składnik (udostępniona do globalnego JS)
+        def delete_item(index):
+            data_store.pop(index)
+            render_list()
+
+        js.window.delete_item_py = delete_item
+
+        def render_list():
+            ul = js.document.getElementById("items-list")
+            ul.innerHTML = ""
+            if not data_store:
+                ul.innerHTML = "Brak wprowadzonych składników."
+                return
+                
+            for i, item in enumerate(data_store):
+                li = js.document.createElement("li")
+                # Pobranie nazwy wyświetlanej z selecta
+                cat_name = js.document.getElementById("category").querySelector(f"option[value='{item['cat']}']").innerText
+                li.innerHTML = f"<strong>{item['amount']:.2f} PLN</strong> -> {cat_name} "
+                
+                # Przycisk usuwania
+                btn = js.document.createElement("button")
+                btn.className = "delete-btn"
+                btn.innerText = "Usuń"
+                btn.setAttribute("onclick", f"window.delete_item_py({i})")
+                li.appendChild(btn)
+                
+                ul.appendChild(li)
+
+        def add_item(e):
+            amt_str = js.document.getElementById("amount").value
+            cat = js.document.getElementById("category").value
+            
+            if not amt_str:
+                js.alert("Proszę wpisać kwotę!")
+                return
+                
+            try:
+                amt = float(amt_str)
+                data_store.append({"cat": cat, "amount": amt})
+                render_list()
+                js.document.getElementById("amount").value = "" # czyszczenie pola
+            except ValueError:
+                js.alert("Wpisana kwota jest niepoprawna.")
+
+        def generate_balance(e):
+            # Inicjalizacja sum
+            sums = {
+                "ak_a_i": 0, "ak_a_ii": 0, "ak_a_iii": 0, "ak_a_iv": 0, "ak_a_v": 0,
+                "ak_b_i": 0, "ak_b_ii": 0, "ak_b_iii": 0, "ak_b_iv": 0,
+                "ak_c": 0, "ak_d": 0,
+                "pa_a_i": 0, "pa_a_ii": 0, "pa_a_iii": 0, "pa_a_iv": 0, "pa_a_v": 0, "pa_a_vi": 0, "pa_a_vii": 0,
+                "pa_b_i": 0, "pa_b_ii": 0, "pa_b_iii": 0, "pa_b_iv": 0
+            }
+
+            # Dodawanie wartości
+            for item in data_store:
+                sums[item["cat"]] += item["amount"]
+
+            # Obliczenia podsumowań
+            aktywa_a = sums["ak_a_i"] + sums["ak_a_ii"] + sums["ak_a_iii"] + sums["ak_a_iv"] + sums["ak_a_v"]
+            aktywa_b = sums["ak_b_i"] + sums["ak_b_ii"] + sums["ak_b_iii"] + sums["ak_b_iv"]
+            razem_aktywa = aktywa_a + aktywa_b + sums["ak_c"] + sums["ak_d"]
+
+            pasywa_a = sums["pa_a_i"] + sums["pa_a_ii"] + sums["pa_a_iii"] + sums["pa_a_iv"] + sums["pa_a_v"] + sums["pa_a_vi"] + sums["pa_a_vii"]
+            pasywa_b = sums["pa_b_i"] + sums["pa_b_ii"] + sums["pa_b_iii"] + sums["pa_b_iv"]
+            razem_pasywa = pasywa_a + pasywa_b
+
+            # Generowanie struktury tabeli HTML
+            html = f"""
+            <table>
+                <tr><th colspan="2">AKTYWA</th><th colspan="2">PASYWA</th></tr>
+                <tr><th>Pozycja</th><th>Wartość</th><th>Pozycja</th><th>Wartość</th></tr>
+
+                <tr><td class='section-header'>A. Aktywa trwałe</td><td class='section-header'>{aktywa_a:.2f}</td><td class='section-header'>A. Kapitał (fundusz) własny</td><td class='section-header'>{pasywa_a:.2f}</td></tr>
+                <tr><td>I. Wartości niematerialne i prawne</td><td>{sums['ak_a_i']:.2f}</td><td>I. Kapitał (fundusz) podstawowy</td><td>{sums['pa_a_i']:.2f}</td></tr>
+                <tr><td>II. Rzeczowe aktywa trwałe</td><td>{sums['ak_a_ii']:.2f}</td><td>II. Kapitał (fundusz) zapasowy</td><td>{sums['pa_a_ii']:.2f}</td></tr>
+                <tr><td>III. Należności długoterminowe</td><td>{sums['ak_a_iii']:.2f}</td><td>III. Kapitał (fundusz) z aktualizacji wyceny</td><td>{sums['pa_a_iii']:.2f}</td></tr>
+                <tr><td>IV. Inwestycje długoterminowe</td><td>{sums['ak_a_iv']:.2f}</td><td>IV. Pozostałe kapitały (fundusze) rezerwowe</td><td>{sums['pa_a_iv']:.2f}</td></tr>
+                <tr><td>V. Długoterminowe rozliczenia międzyokresowe</td><td>{sums['ak_a_v']:.2f}</td><td>V. Zysk (strata) z lat ubiegłych</td><td>{sums['pa_a_v']:.2f}</td></tr>
+
+                <tr><td class='section-header'>B. Aktywa obrotowe</td><td class='section-header'>{aktywa_b:.2f}</td><td>VI. Zysk (strata) netto</td><td>{sums['pa_a_vi']:.2f}</td></tr>
+                <tr><td>I. Zapasy</td><td>{sums['ak_b_i']:.2f}</td><td>VII. Odpisy z zysku netto... (ujemne)</td><td>{sums['pa_a_vii']:.2f}</td></tr>
+                <tr><td>II. Należności krótkoterminowe</td><td>{sums['ak_b_ii']:.2f}</td><td class='section-header'>B. Zobowiązania i rezerwy na zobowiązania</td><td class='section-header'>{pasywa_b:.2f}</td></tr>
+                <tr><td>III. Inwestycje krótkoterminowe</td><td>{sums['ak_b_iii']:.2f}</td><td>I. Rezerwy na zobowiązania</td><td>{sums['pa_b_i']:.2f}</td></tr>
+                <tr><td>IV. Krótkoterminowe rozliczenia międzyokresowe</td><td>{sums['ak_b_iv']:.2f}</td><td>II. Zobowiązania długoterminowe</td><td>{sums['pa_b_ii']:.2f}</td></tr>
+
+                <tr><td class='section-header'>C. Należne wpłaty na kapitał...</td><td class='section-header'>{sums['ak_c']:.2f}</td><td>III. Zobowiązania krótkoterminowe</td><td>{sums['pa_b_iii']:.2f}</td></tr>
+                <tr><td class='section-header'>D. Udziały (akcje) własne</td><td class='section-header'>{sums['ak_d']:.2f}</td><td>IV. Rozliczenia międzyokresowe</td><td>{sums['pa_b_iv']:.2f}</td></tr>
+
+                <tr><td class='main-total'>RAZEM AKTYWA</td><td class='main-total'>{razem_aktywa:.2f}</td><td class='main-total'>RAZEM PASYWA</td><td class='main-total'>{razem_pasywa:.2f}</td></tr>
+            </table>
+            """
+            js.document.getElementById("bilans-output").innerHTML = html
+    </script>
+</body>
+</html>
