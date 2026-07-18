@@ -2,8 +2,7 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Generator Bilansu + Księga Główna (Konta T-owe)</title>
-    <!-- Ładowanie środowiska PyScript -->
+    <title>Kompleksowy Generator Bilansu + Księga Główna</title>
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
     <style>
@@ -12,90 +11,70 @@
         h2, h3 { color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
         
         .section { margin-bottom: 30px; padding: 20px; background: #fdfdfd; border: 1px solid #e0e0e0; border-radius: 5px; }
-        .input-group { margin-bottom: 10px; }
-        select, input { padding: 8px; max-width: 100%; border: 1px solid #ccc; border-radius: 4px; }
-        button { padding: 8px 15px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .input-group { margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;}
+        select, input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        input[type="text"] { min-width: 150px; }
+        button { padding: 8px 15px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s;}
         button:hover { background-color: #2980b9; }
+        
         .delete-btn { background-color: #e74c3c; padding: 4px 8px; margin-left: 10px; font-size: 0.8em; }
         .delete-btn:hover { background-color: #c0392b; }
         .action-btn { background-color: #27ae60; font-size: 1.1em; width: 100%; margin-top: 10px; padding: 12px; }
         .action-btn:hover { background-color: #219653; }
         .close-btn { background-color: #f39c12; width: 100%; margin-top: 15px; }
         
-        /* Konta T-owe - Style */
+        /* Konta T-owe */
         #t-accounts-container { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 15px; }
-        .t-account { width: 340px; border: 1px solid #bdc3c7; background: #fff; box-shadow: 2px 2px 5px rgba(0,0,0,0.05); }
-        .t-header { text-align: center; font-weight: bold; font-size: 1.1em; border-bottom: 4px solid #2c3e50; padding: 8px; background: #ecf0f1; }
+        .t-account { width: 380px; border: 1px solid #bdc3c7; background: #fff; box-shadow: 2px 2px 5px rgba(0,0,0,0.05); }
+        .t-header { text-align: center; font-weight: bold; font-size: 1.0em; border-bottom: 4px solid #2c3e50; padding: 8px; background: #ecf0f1; }
         .t-body { display: flex; }
-        .t-side { width: 50%; padding: 5px; box-sizing: border-box; }
+        .t-side { width: 50%; padding: 5px; box-sizing: border-box; display: flex; flex-direction: column;}
         .t-wn { border-right: 4px solid #2c3e50; }
-        .t-row { display: flex; justify-content: space-between; font-size: 0.9em; margin-bottom: 2px; border-bottom: 1px dashed #eee; }
-        .t-input-row { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+        .t-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.9em; margin-bottom: 4px; border-bottom: 1px dashed #eee; padding-bottom: 2px;}
+        .op-actions { display: flex; gap: 3px; }
+        .op-btn { background: none; border: none; cursor: pointer; padding: 0 3px; font-size: 1.1em; color: #7f8c8d; }
+        .op-btn:hover { color: #e74c3c; transform: scale(1.1); }
+        
+        .t-input-row { display: flex; flex-direction: column; gap: 5px; margin-top: auto; padding-top: 10px;}
         .t-input-row input { width: 100%; box-sizing: border-box; padding: 4px; font-size: 0.85em; }
-        .t-input-row button { padding: 4px; font-size: 0.85em; }
         .t-sum { font-weight: bold; border-top: 2px solid #95a5a6; padding-top: 5px; margin-top: 5px; display: flex; justify-content: space-between;}
         .t-saldo { font-weight: bold; color: #d35400; border-top: 2px solid #e67e22; border-bottom: 2px double #e67e22; padding: 5px 0; margin-top: 5px; text-align: center; background: #fdf4e3; }
         
-        /* Stylizacja tabeli bilansu */
+        /* Tabela bilansu */
         table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.95em; background: #fff; }
-        th, td { border: 1px solid #7f8c8d; padding: 10px; text-align: left; }
+        th, td { border: 1px solid #7f8c8d; padding: 8px; text-align: left; }
         th { background-color: #bdc3c7; text-align: center; font-size: 1.05em; }
         .section-header { font-weight: bold; background-color: #ecf0f1; }
         .main-total { font-weight: bold; font-size: 1.15em; background-color: #95a5a6; color: white; }
+        .val { text-align: right; } /* Wyrównanie liczb do prawej */
     </style>
 </head>
 <body>
     <div class="container">
-        <h2 style="text-align: center;">Kompleksowy Generator Bilansu</h2>
+        <h2 style="text-align: center;">Księga Główna i Bilans (Edycja Zaawansowana)</h2>
         
         <!-- SEKCJA 1: KONTA T-OWE -->
         <div class="section">
             <h3>Księga Główna (Konta T-owe)</h3>
             <div class="input-group">
-                <label>Wybierz konto z planu kont: 
-                    <select id="t_account_select">
-                        <optgroup label="Zespół 0 - Aktywa trwałe">
-                            <option value="010">010 Środki trwałe</option>
-                            <option value="020">020 Wartości niematerialne i prawne</option>
-                            <option value="070">070 Umorzenie środków trwałych</option>
-                        </optgroup>
-                        <optgroup label="Zespół 1 - Środki pieniężne i rachunki">
-                            <option value="100">100 Kasa</option>
-                            <option value="130">130 Rachunek bieżący</option>
-                            <option value="134">134 Kredyty bankowe</option>
-                        </optgroup>
-                        <optgroup label="Zespół 2 - Rozrachunki (Aktywno-Pasywne)">
-                            <option value="200">200 Rozrachunki z odbiorcami</option>
-                            <option value="202">202 Rozrachunki z dostawcami</option>
-                            <option value="220">220 Rozrachunki publicznoprawne</option>
-                            <option value="230">230 Rozrachunki z tytułu wynagrodzeń</option>
-                        </optgroup>
-                        <optgroup label="Zespół 3 - Materiały i towary">
-                            <option value="310">310 Materiały</option>
-                            <option value="330">330 Towary</option>
-                        </optgroup>
-                        <optgroup label="Zespół 8 - Kapitały">
-                            <option value="800">800 Kapitał (fundusz) podstawowy</option>
-                            <option value="811">811 Kapitał (fundusz) zapasowy</option>
-                            <option value="860">860 Wynik finansowy</option>
-                        </optgroup>
-                    </select>
+                <label>Wybierz konto z pełnego planu: 
+                    <!-- Opcje zostaną wstrzyknięte automatycznie przez Pythona! -->
+                    <select id="t_account_select" style="max-width: 500px;"></select>
                 </label>
                 <button py-click="add_t_account">Utwórz konto T-owe</button>
             </div>
             
             <div id="t-accounts-container"></div>
             
-            <button class="close-btn" py-click="close_t_accounts">ZAMKNIJ KONTA (Przenieś salda do Bilansu)</button>
+            <button class="close-btn" py-click="close_t_accounts">ZAMKNIJ KONTA (Wylicz Salda i Przygotuj do Bilansu)</button>
         </div>
 
-        <!-- SEKCJA 2: BEZPOŚREDNIE WPROWADZANIE DO BILANSU -->
+        <!-- SEKCJA 2: RĘCZNE WPROWADZANIE DO BILANSU -->
         <div class="section">
-            <h3>Bezpośrednie wprowadzanie do bilansu (Ręczne pozycje)</h3>
+            <h3>Bezpośrednie wprowadzanie do bilansu</h3>
             <div class="input-group">
-                <input type="number" id="amount" step="0.01" placeholder="Kwota (np. 1500.50)">
+                <input type="text" id="amount" placeholder="Kwota (np. 1 000 000,50)">
                 <select id="category">
-                    <!-- Opcje bilansowe z poprzedniego programu -->
                     <option value="ak_a_i">AKTYWA - A.I. Wartości niematerialne i prawne</option>
                     <option value="ak_a_ii">AKTYWA - A.II. Rzeczowe aktywa trwałe</option>
                     <option value="ak_a_iii">AKTYWA - A.III. Należności długoterminowe</option>
@@ -113,7 +92,7 @@
                     <option value="pa_a_iv">PASYWA - A.IV. Pozostałe kapitały rezerwowe</option>
                     <option value="pa_a_v">PASYWA - A.V. Zysk (strata) z lat ubiegłych</option>
                     <option value="pa_a_vi">PASYWA - A.VI. Zysk (strata) netto</option>
-                    <option value="pa_a_vii">PASYWA - A.VII. Odpisy z zysku netto (wpisz minus!)</option>
+                    <option value="pa_a_vii">PASYWA - A.VII. Odpisy z zysku netto (z minusem!)</option>
                     <option value="pa_b_i">PASYWA - B.I. Rezerwy na zobowiązania</option>
                     <option value="pa_b_ii">PASYWA - B.II. Zobowiązania długoterminowe</option>
                     <option value="pa_b_iii">PASYWA - B.III. Zobowiązania krótkoterminowe</option>
@@ -125,34 +104,184 @@
         </div>
 
         <button class="action-btn" py-click="generate_balance">GENERUJ ZBIORCZY BILANS</button>
-
         <div id="bilans-output"></div>
     </div>
 
     <script type="py">
         import js
 
-        # --- BAZA WIEDZY O KONTACH (Rodzaj i przypisanie do bilansu) ---
-        # Typy: 'A' - Aktywne (Saldo Dt), 'P' - Pasywne (Saldo Ct), 
-        # 'AP' - Aktywno-Pasywne (Saldo Dt -> Aktywa, Saldo Ct -> Pasywa)
-        # 'A_contra' - Korygujące aktywa (Umorzenie - Saldo Ct pomniejsza Aktywa)
+        # --- BAZA WIEDZY: PEŁNY PLAN KONT ---
+        # Znaczenie typów:
+        # A = Aktywne, P = Pasywne, AP = Aktywno-Pasywne
+        # A_contra = Korygujące aktywa (Umorzenie)
+        # R = Przychody (Revenue) -> lądują w Wyniku Finansowym (Zysk Netto)
+        # E = Koszty (Expense) -> pomniejszają Wynik Finansowy (Zysk Netto)
+        # [0: Nazwa, 1: Typ, 2: Target Bilansu 1 (lub Target A), 3: Target Bilansu 2 (Target P dla AP)]
         CHART_OF_ACCOUNTS = {
-            "010": {"name": "Środki trwałe", "type": "A", "target": "ak_a_ii"},
-            "020": {"name": "Wartości niematerialne i prawne", "type": "A", "target": "ak_a_i"},
-            "070": {"name": "Umorzenie środków trwałych", "type": "A_contra", "target": "ak_a_ii"},
-            "100": {"name": "Kasa", "type": "A", "target": "ak_b_iii"},
-            "130": {"name": "Rachunek bieżący", "type": "A", "target": "ak_b_iii"},
-            "134": {"name": "Kredyty bankowe", "type": "P", "target": "pa_b_iii"},
-            "200": {"name": "Rozrachunki z odbiorcami", "type": "AP", "target_A": "ak_b_ii", "target_P": "pa_b_iii"},
-            "202": {"name": "Rozrachunki z dostawcami", "type": "AP", "target_A": "ak_b_ii", "target_P": "pa_b_iii"},
-            "220": {"name": "Rozrachunki publicznoprawne", "type": "AP", "target_A": "ak_b_ii", "target_P": "pa_b_iii"},
-            "230": {"name": "Rozrachunki z tyt. wynagrodzeń", "type": "AP", "target_A": "ak_b_ii", "target_P": "pa_b_iii"},
-            "310": {"name": "Materiały", "type": "A", "target": "ak_b_i"},
-            "330": {"name": "Towary", "type": "A", "target": "ak_b_i"},
-            "800": {"name": "Kapitał (fundusz) podstawowy", "type": "P", "target": "pa_a_i"},
-            "811": {"name": "Kapitał (fundusz) zapasowy", "type": "P", "target": "pa_a_ii"},
-            "860": {"name": "Wynik finansowy", "type": "P", "target": "pa_a_vi"}
+            "010": ["Środki trwałe", "A", "ak_a_ii"],
+            "010-1": ["Grunty (w tym prawo użytkowania wieczystego)", "A", "ak_a_ii"],
+            "010-2": ["Budynki, lokale, prawa do lokali...", "A", "ak_a_ii"],
+            "010-3": ["Urządzenia techniczne i maszyny", "A", "ak_a_ii"],
+            "010-4": ["Środki transportu", "A", "ak_a_ii"],
+            "010-5": ["Inne środki trwałe", "A", "ak_a_ii"],
+            "020": ["Wartości niematerialne i prawne", "A", "ak_a_i"],
+            "030": ["Inwestycje długoterminowe", "A", "ak_a_iv"],
+            "030-1": ["Nieruchomości inwestycyjne", "A", "ak_a_iv"],
+            "030-2": ["Inwestycje w wartości niematerialne i prawne", "A", "ak_a_iv"],
+            "030-3": ["Udziały i akcje w innych jednostkach", "A", "ak_a_iv"],
+            "030-4": ["Inne długoterminowe papiery wartościowe", "A", "ak_a_iv"],
+            "030-5": ["Inne długoterminowe aktywa finansowe", "A", "ak_a_iv"],
+            "030-6": ["Inne inwestycje długoterminowe", "A", "ak_a_iv"],
+            "070": ["Umorzenie środków trwałych", "A_contra", "ak_a_ii"],
+            "070-1": ["Umorzenie gruntów...", "A_contra", "ak_a_ii"],
+            "070-2": ["Umorzenie budynków...", "A_contra", "ak_a_ii"],
+            "070-3": ["Umorzenie urządzeń technicznych...", "A_contra", "ak_a_ii"],
+            "070-4": ["Umorzenie środków transportu", "A_contra", "ak_a_ii"],
+            "070-5": ["Umorzenie innych środków trwałych", "A_contra", "ak_a_ii"],
+            "075": ["Umorzenie wartości niematerialnych i prawnych", "A_contra", "ak_a_i"],
+            "080": ["Środki trwałe w budowie", "A", "ak_a_ii"],
+            "099": ["Konta pozabilansowe", "None", ""],
+            "099-3": ["Środki trwałe w likwidacji", "None", ""],
+
+            "100": ["Kasa", "A", "ak_b_iii"],
+            "130": ["Rachunki bankowe podstawowe", "A", "ak_b_iii"],
+            "130-1": ["Rachunek bieżący", "A", "ak_b_iii"],
+            "130-2": ["Rachunek VAT", "A", "ak_b_iii"],
+            "132": ["Rachunki bankowe pomocnicze", "A", "ak_b_iii"],
+            "133": ["Lokaty bankowe", "A", "ak_b_iii"],
+            "133-1": ["Lokaty bankowe - długoterminowe", "A", "ak_a_iv"],
+            "133-2": ["Lokaty bankowe - krótkoterminowe", "A", "ak_b_iii"],
+            "134": ["Kredyty bankowe", "P", "pa_b_iii"],
+            "134-1": ["Kredyty bankowe - długoterminowe", "P", "pa_b_ii"],
+            "134-2": ["Kredyty bankowe - krótkoterminowe", "P", "pa_b_iii"],
+            "139": ["Środki pieniężne w drodze", "A", "ak_b_iii"],
+            "140": ["Pozostałe krótkoterminowe aktywa finansowe", "A", "ak_b_iii"],
+            "141": ["Inne inwestycje krótkoterminowe", "A", "ak_b_iii"],
+            "160": ["Udziały (akcje) własne", "A", "ak_d"],
+
+            "200": ["Rozrachunki z odbiorcami", "AP", "ak_b_ii", "pa_b_iii"],
+            "202": ["Rozrachunki z dostawcami", "AP", "ak_b_ii", "pa_b_iii"],
+            "220": ["Rozrachunki publicznoprawne", "AP", "ak_b_ii", "pa_b_iii"],
+            "220-1": ["Rozrachunki z tytułu VAT", "AP", "ak_b_ii", "pa_b_iii"],
+            "220-2": ["Rozrachunki z tytułu podatku (PIT)", "AP", "ak_b_ii", "pa_b_iii"],
+            "220-3": ["Rozrachunki z tytułu podatku (CIT)", "AP", "ak_b_ii", "pa_b_iii"],
+            "220-4": ["Rozrachunki z ZUS", "AP", "ak_b_ii", "pa_b_iii"],
+            "220-6": ["Pozostałe rozrachunki publicznoprawne", "AP", "ak_b_ii", "pa_b_iii"],
+            "221": ["Rozliczenie VAT należnego i naliczonego", "AP", "ak_b_ii", "pa_b_iii"],
+            "221-1": ["VAT należny", "AP", "ak_b_ii", "pa_b_iii"],
+            "221-2": ["VAT naliczony", "AP", "ak_b_ii", "pa_b_iii"],
+            "230": ["Rozrachunki z tytułu wynagrodzeń", "AP", "ak_b_ii", "pa_b_iii"],
+            "234": ["Pozostałe rozrachunki z pracownikami", "AP", "ak_b_ii", "pa_b_iii"],
+            "240": ["Rozrachunki z tyt. nabycia/rozchodu aktywów", "AP", "ak_b_ii", "pa_b_iii"],
+            "240-1": ["Rozrachunki z tyt. nabycia niefin. aktywów", "AP", "ak_b_ii", "pa_b_iii"],
+            "240-2": ["Rozrachunki z tyt. rozchodu niefin. aktywów", "AP", "ak_b_ii", "pa_b_iii"],
+            "241": ["Udzielone pożyczki", "A", "ak_b_iii"],
+            "241-1": ["Udzielone pożyczki - długoterminowe", "A", "ak_a_iv"],
+            "241-2": ["Udzielone pożyczki - krótkoterminowe", "A", "ak_b_iii"],
+            "242": ["Otrzymane pożyczki", "P", "pa_b_iii"],
+            "242-1": ["Otrzymane pożyczki - długoterminowe", "P", "pa_b_ii"],
+            "242-2": ["Otrzymane pożyczki - krótkoterminowe", "P", "pa_b_iii"],
+            "245": ["Należne wpłaty na kapitał własny", "A", "ak_c"],
+            "249": ["Pozostałe rozrachunki", "AP", "ak_b_ii", "pa_b_iii"],
+
+            "300": ["Rozliczenie zakupu", "AP", "ak_b_i", "pa_b_iii"],
+            "300-1": ["Rozliczenie zakupu WNP", "AP", "ak_a_i", "pa_b_iii"],
+            "300-2": ["Rozliczenie zakupu ŚT", "AP", "ak_a_ii", "pa_b_iii"],
+            "300-3": ["Rozliczenie zakupu materiałów", "AP", "ak_b_i", "pa_b_iii"],
+            "300-4": ["Rozliczenie zakupu towarów", "AP", "ak_b_i", "pa_b_iii"],
+            "310": ["Materiały", "A", "ak_b_i"],
+            "330": ["Towary", "A", "ak_b_i"],
+
+            "400": ["Amortyzacja", "E", ""],
+            "401": ["Zużycie materiałów i energii", "E", ""],
+            "402": ["Usługi obce", "E", ""],
+            "403": ["Podatki i opłaty", "E", ""],
+            "404": ["Wynagrodzenia", "E", ""],
+            "405": ["Ubezpieczenia społeczne i inne świadczenia", "E", ""],
+            "409": ["Pozostałe koszty rodzajowe", "E", ""],
+            "490": ["Rozliczenie kosztów rodzajowych", "E", ""],
+
+            "500": ["Koszty działalności podstawowej", "E", ""],
+            "500-1": ["Koszty produkcji wyrobów", "E", ""],
+            "500-2": ["Koszty działalności usługowej", "E", ""],
+            "500-3": ["Koszty działalności handlowej", "E", ""],
+            "540": ["Koszty sprzedaży", "E", ""],
+            "550": ["Koszty ogólnego zarządu", "E", ""],
+
+            "600": ["Wyroby (produkty)", "A", "ak_b_i"],
+            "600-1": ["Wyroby gotowe", "A", "ak_b_i"],
+            "600-2": ["Półprodukty", "A", "ak_b_i"],
+            "600-3": ["Produkty w toku", "A", "ak_b_i"],
+            "640": ["Rozliczenia międzyokresowe", "AP", "ak_b_iv", "pa_b_iv"],
+
+            "700": ["Przychody ze sprzedaży produktów", "R", ""],
+            "700-1": ["Przychody ze sprzedaży wyrobów gotowych", "R", ""],
+            "700-2": ["Przychody ze sprzedaży usług", "R", ""],
+            "711": ["Koszt wytworzenia sprzedanych produktów", "E", ""],
+            "711-1": ["Koszt wytworzenia sprzed. wyrobów gotowych", "E", ""],
+            "711-2": ["Koszt wytworzenia sprzed. usług", "E", ""],
+            "730": ["Przychody ze sprzedaży towarów", "R", ""],
+            "731": ["Wartość sprzedanych towarów", "E", ""],
+            "750": ["Przychody finansowe", "R", ""],
+            "750-1": ["Dywidendy i udziały w zyskach", "R", ""],
+            "750-2": ["Odsetki", "R", ""],
+            "750-3": ["Przychody z tyt. rozchodu aktywów finans.", "R", ""],
+            "750-4": ["Aktualizacja wartości aktywów finans.", "R", ""],
+            "750-6": ["Inne przychody finansowe", "R", ""],
+            "751": ["Koszty finansowe", "E", ""],
+            "751-1": ["Odsetki", "E", ""],
+            "751-2": ["Koszty z tyt. rozchodu aktywów finans.", "E", ""],
+            "751-3": ["Aktualizacja wartości aktywów finans.", "E", ""],
+            "751-5": ["Inne koszty finansowe", "E", ""],
+            "760": ["Pozostałe przychody operacyjne", "R", ""],
+            "760-1": ["Przychody z rozchodu niefin. aktywów", "R", ""],
+            "760-3": ["Aktualizacja wartości aktywów niefin.", "R", ""],
+            "760-4": ["Inne pozostałe przychody operacyjne", "R", ""],
+            "761": ["Pozostałe koszty operacyjne", "E", ""],
+            "761-1": ["Koszty z rozchodu niefin. aktywów", "E", ""],
+            "761-2": ["Aktualizacja wartości aktywów niefin.", "E", ""],
+            "761-3": ["Inne pozostałe koszty operacyjne", "E", ""],
+
+            "800": ["Kapitał (fundusz) podstawowy", "P", "pa_a_i"],
+            "811": ["Kapitał (fundusz) zapasowy", "P", "pa_a_ii"],
+            "812": ["Pozostałe kapitały rezerwowe", "P", "pa_a_iv"],
+            "813": ["Kapitał (fundusz) z aktualizacji wyceny", "P", "pa_a_iii"],
+            "820": ["Rozliczenie wyniku finansowego", "P", "pa_a_v"],
+            "830": ["Rezerwy na zobowiązania", "P", "pa_b_i"],
+            "840": ["Rozliczenia międzyokresowe przychodów", "P", "pa_b_iv"],
+            "850": ["Fundusze specjalne", "P", "pa_b_iii"],
+            "860": ["Wynik finansowy", "P", "pa_a_vi"],
+            "870": ["Podatek dochodowy", "E", ""]
         }
+
+        # WSTRZYKIWANIE OPCJI DO HTML (DYNAMICZNIE)
+        def init_select():
+            sel = js.document.getElementById("t_account_select")
+            html = ""
+            current_group = ""
+            for code, data in CHART_OF_ACCOUNTS.items():
+                group = f"Zespół {code[0]}"
+                if group != current_group:
+                    if current_group != "": html += "</optgroup>"
+                    html += f"<optgroup label='{group}'>"
+                    current_group = group
+                html += f"<option value='{code}'>{code} {data[0]}</option>"
+            if current_group != "": html += "</optgroup>"
+            sel.innerHTML = html
+
+        init_select()
+
+        # --- NARZĘDZIA DO FORMATOWANIA LICZB ---
+        def fmt_pln(val):
+            # Zamienia 1234567.89 na "1 234 567,89"
+            s = f"{val:,.2f}"
+            return s.replace(",", "X").replace(".", ",").replace("X", " ")
+
+        def parse_pln(val_str):
+            # Zamienia "1 000 000,50" lub "1000000.50" na int/float
+            if not val_str: return 0.0
+            val_str = str(val_str).replace(" ", "").replace(",", ".")
+            return float(val_str)
 
         # --- STAN APLIKACJI ---
         manual_store = []
@@ -174,7 +303,7 @@
                 li.style.borderBottom = "1px solid #ddd"
                 li.style.padding = "5px 0"
                 cat_name = js.document.getElementById("category").querySelector(f"option[value='{item['cat']}']").innerText
-                li.innerHTML = f"<strong>{item['amount']:.2f}</strong> -> {cat_name} "
+                li.innerHTML = f"<strong>{fmt_pln(item['amount'])}</strong> -> {cat_name} "
                 btn = js.document.createElement("button")
                 btn.className = "delete-btn"
                 btn.innerText = "Usuń"
@@ -187,11 +316,12 @@
             cat = js.document.getElementById("category").value
             if not amt_str: return
             try:
-                manual_store.append({"cat": cat, "amount": float(amt_str)})
+                amt = parse_pln(amt_str)
+                manual_store.append({"cat": cat, "amount": amt})
                 render_manual_list()
                 js.document.getElementById("amount").value = ""
             except:
-                js.alert("Niepoprawna kwota.")
+                js.alert("Niepoprawny format kwoty! Użyj cyfr (np. 1 500,50)")
 
         # --- FUNKCJE DLA KONT T-OWYCH ---
         def add_t_account(e):
@@ -202,24 +332,50 @@
                 accounts_closed = False
                 render_t_accounts()
             else:
-                js.alert("Konto już istnieje na planszy!")
+                js.alert("To konto jest już otwarte na planszy!")
 
         def add_operation(code, side):
             if accounts_closed:
-                js.alert("Konta są zamknięte! Wygeneruj bilans lub zresetuj stronę, by zacząć od nowa.")
+                js.alert("Konta są zamknięte! Wygeneruj bilans lub edytuj wpis (co automatycznie otworzy konta ponownie).")
                 return
             op_input = js.document.getElementById(f"op_{side}_{code}").value
             amt_input = js.document.getElementById(f"amt_{side}_{code}").value
             if not amt_input: return
             try:
-                amt = float(amt_input)
-                op = op_input if op_input else "Sp" # Domyślnie Saldo Początkowe jeśli brak numeru
+                amt = parse_pln(amt_input)
+                op = op_input if op_input else "Sp"
                 t_accounts_store[code][side].append({"op": op, "amt": amt})
                 render_t_accounts()
             except:
                 js.alert("Niepoprawna kwota w operacji.")
 
+        def edit_operation(code, side, idx):
+            op_data = t_accounts_store[code][side][idx]
+            new_amt_str = js.prompt("Wpisz nową kwotę (np. 1 500,50):", fmt_pln(op_data['amt']))
+            if new_amt_str is None: return # Anulowano
+            new_op_str = js.prompt("Wpisz nowy numer operacji:", op_data['op'])
+            if new_op_str is None: return
+            
+            try:
+                amt = parse_pln(new_amt_str)
+                t_accounts_store[code][side][idx] = {"op": new_op_str, "amt": amt}
+                global accounts_closed
+                accounts_closed = False # Otwieramy konta z powrotem, bo zaszła zmiana
+                render_t_accounts()
+            except ValueError:
+                js.alert("Niepoprawny format kwoty!")
+
+        def delete_operation(code, side, idx):
+            if js.confirm("Czy na pewno chcesz usunąć tę pozycję z konta?"):
+                t_accounts_store[code][side].pop(idx)
+                global accounts_closed
+                accounts_closed = False
+                render_t_accounts()
+
+        # Udostępnienie funkcji do środowiska JS
         js.window.add_op_py = add_operation
+        js.window.edit_op_py = edit_operation
+        js.window.del_op_py = delete_operation
 
         def render_t_accounts():
             container = js.document.getElementById("t-accounts-container")
@@ -227,53 +383,57 @@
             for code, data in t_accounts_store.items():
                 acc_info = CHART_OF_ACCOUNTS[code]
                 
-                # Renderowanie operacji Wn
-                wn_html = "".join([f"<div class='t-row'><span>({x['op']})</span><span>{x['amt']:.2f}</span></div>" for x in data['wn']])
-                # Renderowanie operacji Ma
-                ma_html = "".join([f"<div class='t-row'><span>{x['amt']:.2f}</span><span>({x['op']})</span></div>" for x in data['ma']])
+                # Budowanie HTML dla Wn
+                wn_html = ""
+                for idx, x in enumerate(data['wn']):
+                    wn_html += f"<div class='t-row'><span>({x['op']})</span> <span>{fmt_pln(x['amt'])} <span class='op-actions'><button class='op-btn' onclick=\"window.edit_op_py('{code}', 'wn', {idx})\">✎</button><button class='op-btn' onclick=\"window.del_op_py('{code}', 'wn', {idx})\">❌</button></span></span></div>"
                 
-                # Obliczanie sum (obroty) i ewentualnie salda
+                # Budowanie HTML dla Ma
+                ma_html = ""
+                for idx, x in enumerate(data['ma']):
+                    ma_html += f"<div class='t-row'><span><span class='op-actions'><button class='op-btn' onclick=\"window.del_op_py('{code}', 'ma', {idx})\">❌</button><button class='op-btn' onclick=\"window.edit_op_py('{code}', 'ma', {idx})\">✎</button></span> {fmt_pln(x['amt'])}</span> <span>({x['op']})</span></div>"
+                
+                # Sumy
                 sum_wn = sum([x['amt'] for x in data['wn']])
                 sum_ma = sum([x['amt'] for x in data['ma']])
                 
                 saldo_html = ""
                 if accounts_closed:
-                    if acc_info['type'] == 'A':
+                    if acc_info[1] == 'A' or acc_info[1] == 'E':
                         saldo = sum_wn - sum_ma
-                        saldo_html = f"<div class='t-saldo'>Sk (Wn): {saldo:.2f}</div>"
-                    elif acc_info['type'] == 'P' or acc_info['type'] == 'A_contra':
+                        saldo_html = f"<div class='t-saldo'>Sk (Wn): {fmt_pln(saldo)}</div>"
+                    elif acc_info[1] == 'P' or acc_info[1] == 'A_contra' or acc_info[1] == 'R':
                         saldo = sum_ma - sum_wn
-                        saldo_html = f"<div class='t-saldo'>Sk (Ma): {saldo:.2f}</div>"
-                    elif acc_info['type'] == 'AP':
+                        saldo_html = f"<div class='t-saldo'>Sk (Ma): {fmt_pln(saldo)}</div>"
+                    elif acc_info[1] == 'AP':
                         if sum_wn > sum_ma:
-                            saldo_html = f"<div class='t-saldo'>Sk (Wn): {(sum_wn - sum_ma):.2f}</div>"
+                            saldo_html = f"<div class='t-saldo'>Sk (Wn): {fmt_pln(sum_wn - sum_ma)}</div>"
                         elif sum_ma > sum_wn:
-                            saldo_html = f"<div class='t-saldo'>Sk (Ma): {(sum_ma - sum_wn):.2f}</div>"
+                            saldo_html = f"<div class='t-saldo'>Sk (Ma): {fmt_pln(sum_ma - sum_wn)}</div>"
                         else:
-                            saldo_html = f"<div class='t-saldo'>Sk: 0.00</div>"
+                            saldo_html = f"<div class='t-saldo'>Sk: 0,00</div>"
 
-                # Blok HTML konta
                 acc_html = f"""
                 <div class="t-account">
-                    <div class="t-header">{code} {acc_info['name']}</div>
+                    <div class="t-header">{code} {acc_info[0]}</div>
                     <div class="t-body">
                         <div class="t-side t-wn">
                             <div style="text-align:center; font-weight:bold; margin-bottom:5px;">Dt (Wn)</div>
                             {wn_html}
-                            <div class="t-sum"><span>Obroty:</span><span>{sum_wn:.2f}</span></div>
+                            <div class="t-sum"><span>Obr:</span><span>{fmt_pln(sum_wn)}</span></div>
                             <div class="t-input-row">
-                                <input type="text" id="op_wn_{code}" placeholder="Nr op. (np. Sp, 1)">
-                                <input type="number" id="amt_wn_{code}" placeholder="Kwota" step="0.01">
+                                <input type="text" id="op_wn_{code}" placeholder="Nr (np. Sp)">
+                                <input type="text" id="amt_wn_{code}" placeholder="Kwota">
                                 <button onclick="window.add_op_py('{code}', 'wn')">Księguj Wn</button>
                             </div>
                         </div>
                         <div class="t-side">
                             <div style="text-align:center; font-weight:bold; margin-bottom:5px;">Ct (Ma)</div>
                             {ma_html}
-                            <div class="t-sum"><span>{sum_ma:.2f}</span><span>:Obroty</span></div>
+                            <div class="t-sum"><span>{fmt_pln(sum_ma)}</span><span>:Obr</span></div>
                             <div class="t-input-row">
-                                <input type="text" id="op_ma_{code}" placeholder="Nr op. (np. 2, 3)">
-                                <input type="number" id="amt_ma_{code}" placeholder="Kwota" step="0.01">
+                                <input type="text" id="op_ma_{code}" placeholder="Nr (np. 1)">
+                                <input type="text" id="amt_ma_{code}" placeholder="Kwota">
                                 <button onclick="window.add_op_py('{code}', 'ma')">Księguj Ma</button>
                             </div>
                         </div>
@@ -288,15 +448,14 @@
             global accounts_closed
             accounts_closed = True
             render_t_accounts()
-            js.alert("Konta zostały pomyślnie zamknięte. Salda końcowe (Sk) zostały wyliczone i są gotowe do ujęcia w Bilansie!")
+            js.alert("Konta zamknięte! Salda końcowe obliczone (Koszty i Przychody zostały przygotowane do uwzględnienia w Wyniku Finansowym).")
 
-        # --- GENEROWANIE BILANSU (ZBIORCZE) ---
+        # --- GENEROWANIE BILANSU ---
         def generate_balance(e):
             if t_accounts_store and not accounts_closed:
-                js.alert("Masz otwarte konta T-owe! Najpierw kliknij 'ZAMKNIJ KONTA', aby przenieść ich salda do bilansu.")
+                js.alert("Masz otwarte konta T-owe! Najpierw zamknij konta przyciskiem pomarańczowym.")
                 return
 
-            # Reset sum dla kategorii bilansowych
             sums = {
                 "ak_a_i": 0, "ak_a_ii": 0, "ak_a_iii": 0, "ak_a_iv": 0, "ak_a_v": 0,
                 "ak_b_i": 0, "ak_b_ii": 0, "ak_b_iii": 0, "ak_b_iv": 0, "ak_c": 0, "ak_d": 0,
@@ -304,37 +463,49 @@
                 "pa_b_i": 0, "pa_b_ii": 0, "pa_b_iii": 0, "pa_b_iv": 0
             }
 
-            # KROK 1: Dodanie wpisów ręcznych
+            net_profit_from_operations = 0
+
+            # 1. Wpisy ręczne
             for item in manual_store:
                 sums[item["cat"]] += item["amount"]
 
-            # KROK 2: Dodanie zamkniętych sald z kont T-owych
+            # 2. Konta T-owe
             for code, data in t_accounts_store.items():
                 acc_info = CHART_OF_ACCOUNTS[code]
                 sum_wn = sum([x['amt'] for x in data['wn']])
                 sum_ma = sum([x['amt'] for x in data['ma']])
+                acc_type = acc_info[1]
 
-                if acc_info['type'] == 'A':
+                if acc_type == 'A':
                     saldo = sum_wn - sum_ma
-                    if saldo > 0: sums[acc_info['target']] += saldo
+                    if saldo > 0: sums[acc_info[2]] += saldo
                 
-                elif acc_info['type'] == 'P':
+                elif acc_type == 'P':
                     saldo = sum_ma - sum_wn
-                    if saldo > 0: sums[acc_info['target']] += saldo
+                    if saldo > 0: sums[acc_info[2]] += saldo
                 
-                elif acc_info['type'] == 'A_contra': # np. Umorzenie (zmniejsza aktywa)
+                elif acc_type == 'A_contra':
                     saldo = sum_ma - sum_wn
-                    if saldo > 0: sums[acc_info['target']] -= saldo # ODEJMUJEMY!
+                    if saldo > 0: sums[acc_info[2]] -= saldo
                 
-                elif acc_info['type'] == 'AP': # Rozrachunki
+                elif acc_type == 'AP':
                     if sum_wn > sum_ma:
-                        # Saldo Dt -> Aktywa (Należności)
-                        sums[acc_info['target_A']] += (sum_wn - sum_ma)
+                        sums[acc_info[2]] += (sum_wn - sum_ma)
                     elif sum_ma > sum_wn:
-                        # Saldo Ct -> Pasywa (Zobowiązania)
-                        sums[acc_info['target_P']] += (sum_ma - sum_wn)
+                        sums[acc_info[3]] += (sum_ma - sum_wn)
+                        
+                elif acc_type == 'R': # Przychody zwiększają zysk
+                    saldo = sum_ma - sum_wn
+                    net_profit_from_operations += saldo
+                    
+                elif acc_type == 'E': # Koszty zmniejszają zysk
+                    saldo = sum_wn - sum_ma
+                    net_profit_from_operations -= saldo
 
-            # Obliczenia podsumowań Głównych
+            # Dodajemy wyliczony zysk (lub stratę) z działalności do Zysku Netto w Bilansie
+            sums["pa_a_vi"] += net_profit_from_operations
+
+            # Obliczenia podsumowań
             aktywa_a = sums["ak_a_i"] + sums["ak_a_ii"] + sums["ak_a_iii"] + sums["ak_a_iv"] + sums["ak_a_v"]
             aktywa_b = sums["ak_b_i"] + sums["ak_b_ii"] + sums["ak_b_iii"] + sums["ak_b_iv"]
             razem_aktywa = aktywa_a + aktywa_b + sums["ak_c"] + sums["ak_d"]
@@ -343,36 +514,35 @@
             pasywa_b = sums["pa_b_i"] + sums["pa_b_ii"] + sums["pa_b_iii"] + sums["pa_b_iv"]
             razem_pasywa = pasywa_a + pasywa_b
 
-            # Generowanie struktury tabeli HTML (wzór zachowany)
             html = f"""
             <table>
                 <tr><th colspan="2">AKTYWA</th><th colspan="2">PASYWA</th></tr>
                 <tr><th>Pozycja</th><th>Wartość</th><th>Pozycja</th><th>Wartość</th></tr>
 
-                <tr><td class='section-header'>A. Aktywa trwałe</td><td class='section-header'>{aktywa_a:.2f}</td><td class='section-header'>A. Kapitał (fundusz) własny</td><td class='section-header'>{pasywa_a:.2f}</td></tr>
-                <tr><td>I. Wartości niematerialne i prawne</td><td>{sums['ak_a_i']:.2f}</td><td>I. Kapitał (fundusz) podstawowy</td><td>{sums['pa_a_i']:.2f}</td></tr>
-                <tr><td>II. Rzeczowe aktywa trwałe</td><td>{sums['ak_a_ii']:.2f}</td><td>II. Kapitał (fundusz) zapasowy</td><td>{sums['pa_a_ii']:.2f}</td></tr>
-                <tr><td>III. Należności długoterminowe</td><td>{sums['ak_a_iii']:.2f}</td><td>III. Kapitał (fundusz) z aktualizacji wyceny</td><td>{sums['pa_a_iii']:.2f}</td></tr>
-                <tr><td>IV. Inwestycje długoterminowe</td><td>{sums['ak_a_iv']:.2f}</td><td>IV. Pozostałe kapitały (fundusze) rezerwowe</td><td>{sums['pa_a_iv']:.2f}</td></tr>
-                <tr><td>V. Długoterminowe rozliczenia międzyokresowe</td><td>{sums['ak_a_v']:.2f}</td><td>V. Zysk (strata) z lat ubiegłych</td><td>{sums['pa_a_v']:.2f}</td></tr>
+                <tr><td class='section-header'>A. Aktywa trwałe</td><td class='section-header val'>{fmt_pln(aktywa_a)}</td><td class='section-header'>A. Kapitał (fundusz) własny</td><td class='section-header val'>{fmt_pln(pasywa_a)}</td></tr>
+                <tr><td>I. Wartości niematerialne i prawne</td><td class='val'>{fmt_pln(sums['ak_a_i'])}</td><td>I. Kapitał (fundusz) podstawowy</td><td class='val'>{fmt_pln(sums['pa_a_i'])}</td></tr>
+                <tr><td>II. Rzeczowe aktywa trwałe</td><td class='val'>{fmt_pln(sums['ak_a_ii'])}</td><td>II. Kapitał (fundusz) zapasowy</td><td class='val'>{fmt_pln(sums['pa_a_ii'])}</td></tr>
+                <tr><td>III. Należności długoterminowe</td><td class='val'>{fmt_pln(sums['ak_a_iii'])}</td><td>III. Kapitał (fundusz) z aktualizacji wyceny</td><td class='val'>{fmt_pln(sums['pa_a_iii'])}</td></tr>
+                <tr><td>IV. Inwestycje długoterminowe</td><td class='val'>{fmt_pln(sums['ak_a_iv'])}</td><td>IV. Pozostałe kapitały (fundusze) rezerwowe</td><td class='val'>{fmt_pln(sums['pa_a_iv'])}</td></tr>
+                <tr><td>V. Długoterm. rozliczenia międzyokresowe</td><td class='val'>{fmt_pln(sums['ak_a_v'])}</td><td>V. Zysk (strata) z lat ubiegłych</td><td class='val'>{fmt_pln(sums['pa_a_v'])}</td></tr>
 
-                <tr><td class='section-header'>B. Aktywa obrotowe</td><td class='section-header'>{aktywa_b:.2f}</td><td>VI. Zysk (strata) netto</td><td>{sums['pa_a_vi']:.2f}</td></tr>
-                <tr><td>I. Zapasy</td><td>{sums['ak_b_i']:.2f}</td><td>VII. Odpisy z zysku netto...</td><td>{sums['pa_a_vii']:.2f}</td></tr>
-                <tr><td>II. Należności krótkoterminowe</td><td>{sums['ak_b_ii']:.2f}</td><td class='section-header'>B. Zobowiązania i rezerwy na zobowiązania</td><td class='section-header'>{pasywa_b:.2f}</td></tr>
-                <tr><td>III. Inwestycje krótkoterminowe</td><td>{sums['ak_b_iii']:.2f}</td><td>I. Rezerwy na zobowiązania</td><td>{sums['pa_b_i']:.2f}</td></tr>
-                <tr><td>IV. Krótkoterminowe rozliczenia międzyokresowe</td><td>{sums['ak_b_iv']:.2f}</td><td>II. Zobowiązania długoterminowe</td><td>{sums['pa_b_ii']:.2f}</td></tr>
+                <tr><td class='section-header'>B. Aktywa obrotowe</td><td class='section-header val'>{fmt_pln(aktywa_b)}</td><td>VI. Zysk (strata) netto</td><td class='val'><strong>{fmt_pln(sums['pa_a_vi'])}</strong></td></tr>
+                <tr><td>I. Zapasy</td><td class='val'>{fmt_pln(sums['ak_b_i'])}</td><td>VII. Odpisy z zysku netto...</td><td class='val'>{fmt_pln(sums['pa_a_vii'])}</td></tr>
+                <tr><td>II. Należności krótkoterminowe</td><td class='val'>{fmt_pln(sums['ak_b_ii'])}</td><td class='section-header'>B. Zobowiązania i rezerwy na zobowiązania</td><td class='section-header val'>{fmt_pln(pasywa_b)}</td></tr>
+                <tr><td>III. Inwestycje krótkoterminowe</td><td class='val'>{fmt_pln(sums['ak_b_iii'])}</td><td>I. Rezerwy na zobowiązania</td><td class='val'>{fmt_pln(sums['pa_b_i'])}</td></tr>
+                <tr><td>IV. Krótkoterm. rozliczenia międzyokresowe</td><td class='val'>{fmt_pln(sums['ak_b_iv'])}</td><td>II. Zobowiązania długoterminowe</td><td class='val'>{fmt_pln(sums['pa_b_ii'])}</td></tr>
 
-                <tr><td class='section-header'>C. Należne wpłaty na kapitał (fundusz) podstawowy</td><td class='section-header'>{sums['ak_c']:.2f}</td><td>III. Zobowiązania krótkoterminowe</td><td>{sums['pa_b_iii']:.2f}</td></tr>
-                <tr><td class='section-header'>D. Udziały (akcje) własne</td><td class='section-header'>{sums['ak_d']:.2f}</td><td>IV. Rozliczenia międzyokresowe</td><td>{sums['pa_b_iv']:.2f}</td></tr>
+                <tr><td class='section-header'>C. Należne wpłaty na kapitał (fundusz) podst.</td><td class='section-header val'>{fmt_pln(sums['ak_c'])}</td><td>III. Zobowiązania krótkoterminowe</td><td class='val'>{fmt_pln(sums['pa_b_iii'])}</td></tr>
+                <tr><td class='section-header'>D. Udziały (akcje) własne</td><td class='section-header val'>{fmt_pln(sums['ak_d'])}</td><td>IV. Rozliczenia międzyokresowe</td><td class='val'>{fmt_pln(sums['pa_b_iv'])}</td></tr>
 
-                <tr><td class='main-total'>RAZEM AKTYWA</td><td class='main-total'>{razem_aktywa:.2f}</td><td class='main-total'>RAZEM PASYWA</td><td class='main-total'>{razem_pasywa:.2f}</td></tr>
+                <tr><td class='main-total'>RAZEM AKTYWA</td><td class='main-total val'>{fmt_pln(razem_aktywa)}</td><td class='main-total'>RAZEM PASYWA</td><td class='main-total val'>{fmt_pln(razem_pasywa)}</td></tr>
             </table>
             """
             js.document.getElementById("bilans-output").innerHTML = html
             
-            # Weryfikacja bilansowa
-            if abs(razem_aktywa - razem_pasywa) > 0.01:
-                js.alert(f"UWAGA! Bilans się nie bilansuje. Różnica wynosi: {abs(razem_aktywa - razem_pasywa):.2f} PLN. Sprawdź księgowania i regułę podwójnego zapisu!")
+            diff = abs(razem_aktywa - razem_pasywa)
+            if diff > 0.01:
+                js.alert(f"UWAGA! Bilans się nie zgadza. Różnica wynosi: {fmt_pln(diff)} PLN.\nSprawdź regułę podwójnego zapisu na kontach T-owych!")
             else:
                 js.alert("Sukces! Aktywa równają się pasywom.")
 
