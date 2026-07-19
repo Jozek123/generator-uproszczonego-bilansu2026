@@ -14,7 +14,7 @@
         .input-group { margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;}
         select, input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; }
         input[type="text"] { min-width: 150px; }
-        select { min-width: 450px; }
+        select { min-width: 550px; }
         button { padding: 8px 15px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s;}
         button:hover { background-color: #2980b9; }
         
@@ -103,26 +103,26 @@
                     <!-- AKTYWA -->
                     <option disabled style="font-weight:bold; background:#eee; color:#000;">AKTYWA</option>
                     <option disabled style="font-weight:bold; color:#333;">A. Aktywa trwałe</option>
-                    <option value="ak_a_i">&nbsp;&nbsp;I. Wartości niematerialne i prawne</option>
-                    <option disabled>&nbsp;&nbsp;II. Rzeczowe aktywa trwałe, w tym:</option>
-                    <option value="ak_a_ii_1">&nbsp;&nbsp;&nbsp;&nbsp;- środki trwałe</option>
-                    <option value="ak_a_ii_2">&nbsp;&nbsp;&nbsp;&nbsp;- środki trwałe w budowie</option>
-                    <option value="ak_a_iii">&nbsp;&nbsp;III. Należności długoterminowe</option>
-                    <option disabled>&nbsp;&nbsp;IV. Inwestycje długoterminowe, w tym:</option>
-                    <option value="ak_a_iv_1">&nbsp;&nbsp;&nbsp;&nbsp;- nieruchomości</option>
-                    <option value="ak_a_iv_2">&nbsp;&nbsp;&nbsp;&nbsp;- długoterminowe aktywa finansowe</option>
-                    <option value="ak_a_v">&nbsp;&nbsp;V. Długoterminowe rozliczenia międzyokresowe</option>
+                    <option value="ak_a_i">A.I. Wartości niematerialne i prawne</option>
+                    <option value="ak_a_ii">A.II. Rzeczowe aktywa trwałe, w tym:</option>
+                    <option value="ak_a_ii_1">&nbsp;&nbsp;A.II.1. - środki trwałe</option>
+                    <option value="ak_a_ii_2">&nbsp;&nbsp;A.II.2. - środki trwałe w budowie</option>
+                    <option value="ak_a_iii">A.III. Należności długoterminowe</option>
+                    <option value="ak_a_iv">A.IV. Inwestycje długoterminowe, w tym:</option>
+                    <option value="ak_a_iv_1">&nbsp;&nbsp;A.IV.1. - nieruchomości</option>
+                    <option value="ak_a_iv_2">&nbsp;&nbsp;A.IV.2. - długoterminowe aktywa finansowe</option>
+                    <option value="ak_a_v">A.V. Długoterminowe rozliczenia międzyokresowe</option>
                     
                     <option disabled style="font-weight:bold; color:#333;">B. Aktywa obrotowe</option>
-                    <option value="ak_b_i">&nbsp;&nbsp;I. Zapasy</option>
-                    <option disabled>&nbsp;&nbsp;II. Należności krótkoterminowe, w tym:</option>
-                    <option disabled>&nbsp;&nbsp;&nbsp;&nbsp;a) z tytułu dostaw i usług, w tym:</option>
-                    <option value="ak_b_ii_a_1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- do 12 miesięcy</option>
-                    <option value="ak_b_ii_a_2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- powyżej 12 miesięcy</option>
-                    <option disabled>&nbsp;&nbsp;III. Inwestycje krótkoterminowe, w tym:</option>
-                    <option disabled>&nbsp;&nbsp;&nbsp;&nbsp;a) krótkoterminowe aktywa finansowe, w tym:</option>
-                    <option value="ak_b_iii_a_1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- środki pieniężne w kasie i na rachunkach</option>
-                    <option value="ak_b_iv">&nbsp;&nbsp;IV. Krótkoterminowe rozliczenia międzyokresowe</option>
+                    <option value="ak_b_i">B.I. Zapasy</option>
+                    <option value="ak_b_ii">B.II. Należności krótkoterminowe, w tym:</option>
+                    <option value="ak_b_ii_a">&nbsp;&nbsp;B.II.a) z tytułu dostaw i usług, w tym:</option>
+                    <option value="ak_b_ii_a_1">&nbsp;&nbsp;&nbsp;&nbsp;B.II.a)1. - do 12 miesięcy</option>
+                    <option value="ak_b_ii_a_2">&nbsp;&nbsp;&nbsp;&nbsp;B.II.a)2. - powyżej 12 miesięcy</option>
+                    <option value="ak_b_iii">B.III. Inwestycje krótkoterminowe, w tym:</option>
+                    <option value="ak_b_iii_a">&nbsp;&nbsp;B.III.a) krótkoterminowe aktywa finansowe, w tym:</option>
+                    <option value="ak_b_iii_a_1">&nbsp;&nbsp;&nbsp;&nbsp;B.III.a)1. - środki pieniężne w kasie i na rachunkach</option>
+                    <option value="ak_b_iv">B.IV. Krótkoterminowe rozliczenia międzyokresowe</option>
                     
                     <option value="ak_c" style="font-weight:bold; color:#333;">C. Należne wpłaty na kapitał (fundusz) podstawowy</option>
                     <option value="ak_d" style="font-weight:bold; color:#333;">D. Udziały (akcje) własne</option>
@@ -130,28 +130,28 @@
                     <!-- PASYWA -->
                     <option disabled style="font-weight:bold; background:#eee; color:#000;">PASYWA</option>
                     <option disabled style="font-weight:bold; color:#333;">A. Kapitał (fundusz) własny</option>
-                    <option value="pa_a_i">&nbsp;&nbsp;I. Kapitał (fundusz) podstawowy</option>
-                    <option disabled>&nbsp;&nbsp;II. Kapitał (fundusz) zapasowy, w tym:</option>
-                    <option value="pa_a_ii_1">&nbsp;&nbsp;&nbsp;&nbsp;- nadwyżka wartości sprzedaży (wartości emisyjnej) nad wartością nominalną udziałów (akcji)</option>
-                    <option disabled>&nbsp;&nbsp;III. Kapitał (fundusz) z aktualizacji wyceny, w tym:</option>
-                    <option value="pa_a_iii_1">&nbsp;&nbsp;&nbsp;&nbsp;- z tytułu aktualizacji wartości godziwej</option>
-                    <option value="pa_a_iv">&nbsp;&nbsp;IV. Pozostałe kapitały (fundusze) rezerwowe</option>
-                    <option value="pa_a_v">&nbsp;&nbsp;V. Zysk (strata) z lat ubiegłych</option>
-                    <option value="pa_a_vi">&nbsp;&nbsp;VI. Zysk (strata) netto</option>
-                    <option value="pa_a_vii">&nbsp;&nbsp;VII. Odpisy z zysku netto w ciągu roku obrotowego (wielkość ujemna)</option>
+                    <option value="pa_a_i">A.I. Kapitał (fundusz) podstawowy</option>
+                    <option value="pa_a_ii">A.II. Kapitał (fundusz) zapasowy, w tym:</option>
+                    <option value="pa_a_ii_1">&nbsp;&nbsp;A.II.1. - nadwyżka wartości sprzedaży...</option>
+                    <option value="pa_a_iii">A.III. Kapitał (fundusz) z aktualizacji wyceny, w tym:</option>
+                    <option value="pa_a_iii_1">&nbsp;&nbsp;A.III.1. - z tytułu aktualizacji wartości godziwej</option>
+                    <option value="pa_a_iv">A.IV. Pozostałe kapitały (fundusze) rezerwowe</option>
+                    <option value="pa_a_v">A.V. Zysk (strata) z lat ubiegłych</option>
+                    <option value="pa_a_vi">A.VI. Zysk (strata) netto</option>
+                    <option value="pa_a_vii">A.VII. Odpisy z zysku netto...</option>
                     
                     <option disabled style="font-weight:bold; color:#333;">B. Zobowiązania i rezerwy na zobowiązania</option>
-                    <option disabled>&nbsp;&nbsp;I. Rezerwy na zobowiązania, w tym:</option>
-                    <option value="pa_b_i_1">&nbsp;&nbsp;&nbsp;&nbsp;- rezerwa na świadczenia emerytalne i podobne</option>
-                    <option disabled>&nbsp;&nbsp;II. Zobowiązania długoterminowe, w tym:</option>
-                    <option value="pa_b_ii_1">&nbsp;&nbsp;&nbsp;&nbsp;- z tytułu kredytów i pożyczek</option>
-                    <option disabled>&nbsp;&nbsp;III. Zobowiązania krótkoterminowe, w tym:</option>
-                    <option value="pa_b_iii_a">&nbsp;&nbsp;&nbsp;&nbsp;a) z tytułu kredytów i pożyczek</option>
-                    <option disabled>&nbsp;&nbsp;&nbsp;&nbsp;b) z tytułu dostaw i usług, w tym:</option>
-                    <option value="pa_b_iii_b_1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- do 12 miesięcy</option>
-                    <option value="pa_b_iii_b_2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- powyżej 12 miesięcy</option>
-                    <option value="pa_b_iii_c">&nbsp;&nbsp;&nbsp;&nbsp;c) fundusze specjalne</option>
-                    <option value="pa_b_iv">&nbsp;&nbsp;IV. Rozliczenia międzyokresowe</option>
+                    <option value="pa_b_i">B.I. Rezerwy na zobowiązania, w tym:</option>
+                    <option value="pa_b_i_1">&nbsp;&nbsp;B.I.1. - rezerwa na świadczenia emerytalne i podobne</option>
+                    <option value="pa_b_ii">B.II. Zobowiązania długoterminowe, w tym:</option>
+                    <option value="pa_b_ii_1">&nbsp;&nbsp;B.II.1. - z tytułu kredytów i pożyczek</option>
+                    <option value="pa_b_iii">B.III. Zobowiązania krótkoterminowe, w tym:</option>
+                    <option value="pa_b_iii_a">&nbsp;&nbsp;B.III.a) z tytułu kredytów i pożyczek</option>
+                    <option value="pa_b_iii_b">&nbsp;&nbsp;B.III.b) z tytułu dostaw i usług, w tym:</option>
+                    <option value="pa_b_iii_b_1">&nbsp;&nbsp;&nbsp;&nbsp;B.III.b)1. - do 12 miesięcy</option>
+                    <option value="pa_b_iii_b_2">&nbsp;&nbsp;&nbsp;&nbsp;B.III.b)2. - powyżej 12 miesięcy</option>
+                    <option value="pa_b_iii_c">&nbsp;&nbsp;B.III.c) fundusze specjalne</option>
+                    <option value="pa_b_iv">B.IV. Rozliczenia międzyokresowe</option>
                 </select>
                 <button py-click="add_manual_item">Dodaj składnik ręcznie</button>
             </div>
@@ -168,7 +168,6 @@
     <script type="py">
         import js
 
-        # ZAKTUALIZOWANE POWIĄZANIA DO NOWEJ STRUKTURY DRZEWIASTEJ
         CHART_OF_ACCOUNTS = {
             "010": ["Środki trwałe", "A", "ak_a_ii_1"],
             "010-1": ["Grunty (w tym prawo użytkowania wieczystego gruntu)", "A", "ak_a_ii_1"],
@@ -652,10 +651,10 @@
                 return
 
             sums = {
-                "ak_a_i": 0, "ak_a_ii_1": 0, "ak_a_ii_2": 0, "ak_a_iii": 0, "ak_a_iv_1": 0, "ak_a_iv_2": 0, "ak_a_v": 0,
-                "ak_b_i": 0, "ak_b_ii_a_1": 0, "ak_b_ii_a_2": 0, "ak_b_iii_a_1": 0, "ak_b_iv": 0, "ak_c": 0, "ak_d": 0,
-                "pa_a_i": 0, "pa_a_ii_1": 0, "pa_a_iii_1": 0, "pa_a_iv": 0, "pa_a_v": 0, "pa_a_vi": 0, "pa_a_vii": 0,
-                "pa_b_i_1": 0, "pa_b_ii_1": 0, "pa_b_iii_a": 0, "pa_b_iii_b_1": 0, "pa_b_iii_b_2": 0, "pa_b_iii_c": 0, "pa_b_iv": 0
+                "ak_a_i": 0, "ak_a_ii": 0, "ak_a_ii_1": 0, "ak_a_ii_2": 0, "ak_a_iii": 0, "ak_a_iv": 0, "ak_a_iv_1": 0, "ak_a_iv_2": 0, "ak_a_v": 0,
+                "ak_b_i": 0, "ak_b_ii": 0, "ak_b_ii_a": 0, "ak_b_ii_a_1": 0, "ak_b_ii_a_2": 0, "ak_b_iii": 0, "ak_b_iii_a": 0, "ak_b_iii_a_1": 0, "ak_b_iv": 0, "ak_c": 0, "ak_d": 0,
+                "pa_a_i": 0, "pa_a_ii": 0, "pa_a_ii_1": 0, "pa_a_iii": 0, "pa_a_iii_1": 0, "pa_a_iv": 0, "pa_a_v": 0, "pa_a_vi": 0, "pa_a_vii": 0,
+                "pa_b_i": 0, "pa_b_i_1": 0, "pa_b_ii": 0, "pa_b_ii_1": 0, "pa_b_iii": 0, "pa_b_iii_a": 0, "pa_b_iii_b": 0, "pa_b_iii_b_1": 0, "pa_b_iii_b_2": 0, "pa_b_iii_c": 0, "pa_b_iv": 0
             }
 
             net_profit_from_operations = 0
@@ -688,23 +687,25 @@
 
             sums["pa_a_vi"] += net_profit_from_operations
 
-            aktywa_a_ii = sums['ak_a_ii_1'] + sums['ak_a_ii_2']
-            aktywa_a_iv = sums['ak_a_iv_1'] + sums['ak_a_iv_2']
+            aktywa_a_ii = sums['ak_a_ii'] + sums['ak_a_ii_1'] + sums['ak_a_ii_2']
+            aktywa_a_iv = sums['ak_a_iv'] + sums['ak_a_iv_1'] + sums['ak_a_iv_2']
             aktywa_a = sums['ak_a_i'] + aktywa_a_ii + sums['ak_a_iii'] + aktywa_a_iv + sums['ak_a_v']
             
-            aktywa_b_ii_a = sums['ak_b_ii_a_1'] + sums['ak_b_ii_a_2']
-            aktywa_b_iii_a = sums['ak_b_iii_a_1']
-            aktywa_b = sums['ak_b_i'] + aktywa_b_ii_a + aktywa_b_iii_a + sums['ak_b_iv']
+            aktywa_b_ii_a = sums['ak_b_ii_a'] + sums['ak_b_ii_a_1'] + sums['ak_b_ii_a_2']
+            aktywa_b_ii = sums['ak_b_ii'] + aktywa_b_ii_a
+            aktywa_b_iii_a = sums['ak_b_iii_a'] + sums['ak_b_iii_a_1']
+            aktywa_b_iii = sums['ak_b_iii'] + aktywa_b_iii_a
+            aktywa_b = sums['ak_b_i'] + aktywa_b_ii + aktywa_b_iii + sums['ak_b_iv']
             razem_aktywa = aktywa_a + aktywa_b + sums['ak_c'] + sums['ak_d']
 
-            pasywa_a_ii = sums['pa_a_ii_1']
-            pasywa_a_iii = sums['pa_a_iii_1']
+            pasywa_a_ii = sums['pa_a_ii'] + sums['pa_a_ii_1']
+            pasywa_a_iii = sums['pa_a_iii'] + sums['pa_a_iii_1']
             pasywa_a = sums['pa_a_i'] + pasywa_a_ii + pasywa_a_iii + sums['pa_a_iv'] + sums['pa_a_v'] + sums['pa_a_vi'] + sums['pa_a_vii']
             
-            pasywa_b_i = sums['pa_b_i_1']
-            pasywa_b_ii = sums['pa_b_ii_1']
-            pasywa_b_iii_b = sums['pa_b_iii_b_1'] + sums['pa_b_iii_b_2']
-            pasywa_b_iii = sums['pa_b_iii_a'] + pasywa_b_iii_b + sums['pa_b_iii_c']
+            pasywa_b_i = sums['pa_b_i'] + sums['pa_b_i_1']
+            pasywa_b_ii = sums['pa_b_ii'] + sums['pa_b_ii_1']
+            pasywa_b_iii_b = sums['pa_b_iii_b'] + sums['pa_b_iii_b_1'] + sums['pa_b_iii_b_2']
+            pasywa_b_iii = sums['pa_b_iii'] + sums['pa_b_iii_a'] + pasywa_b_iii_b + sums['pa_b_iii_c']
             pasywa_b = pasywa_b_i + pasywa_b_ii + pasywa_b_iii + sums['pa_b_iv']
             razem_pasywa = pasywa_a + pasywa_b
 
@@ -714,28 +715,28 @@
                 <tr><th colspan="2">AKTYWA</th><th colspan="2">PASYWA</th></tr>
                 
                 <tr><td class='section-header'>A. Aktywa trwałe</td><td class='section-header val'>{fmt_pln(aktywa_a)}</td><td class='section-header'>A. Kapitał (fundusz) własny</td><td class='section-header val'>{fmt_pln(pasywa_a)}</td></tr>
-                <tr><td>I. Wartości niematerialne i prawne</td><td class='val'>{fmt_pln(sums['ak_a_i'])}</td><td>I. Kapitał (fundusz) podstawowy</td><td class='val'>{fmt_pln(sums['pa_a_i'])}</td></tr>
-                <tr><td>II. Rzeczowe aktywa trwałe, w tym:</td><td class='val'>{fmt_pln(aktywa_a_ii)}</td><td>II. Kapitał (fundusz) zapasowy, w tym:</td><td class='val'>{fmt_pln(pasywa_a_ii)}</td></tr>
-                <tr><td style="padding-left: 20px;">- środki trwałe</td><td class='val'>{fmt_pln(sums['ak_a_ii_1'])}</td><td style="padding-left: 20px;">- nadwyżka wartości sprzedaży (wartości emisyjnej) nad wartością nominalną udziałów (akcji)</td><td class='val'>{fmt_pln(sums['pa_a_ii_1'])}</td></tr>
-                <tr><td style="padding-left: 20px;">- środki trwałe w budowie</td><td class='val'>{fmt_pln(sums['ak_a_ii_2'])}</td><td>III. Kapitał (fundusz) z aktualizacji wyceny, w tym:</td><td class='val'>{fmt_pln(pasywa_a_iii)}</td></tr>
-                <tr><td>III. Należności długoterminowe</td><td class='val'>{fmt_pln(sums['ak_a_iii'])}</td><td style="padding-left: 20px;">- z tytułu aktualizacji wartości godziwej</td><td class='val'>{fmt_pln(sums['pa_a_iii_1'])}</td></tr>
-                <tr><td>IV. Inwestycje długoterminowe, w tym:</td><td class='val'>{fmt_pln(aktywa_a_iv)}</td><td>IV. Pozostałe kapitały (fundusze) rezerwowe</td><td class='val'>{fmt_pln(sums['pa_a_iv'])}</td></tr>
-                <tr><td style="padding-left: 20px;">- nieruchomości</td><td class='val'>{fmt_pln(sums['ak_a_iv_1'])}</td><td>V. Zysk (strata) z lat ubiegłych</td><td class='val'>{fmt_pln(sums['pa_a_v'])}</td></tr>
-                <tr><td style="padding-left: 20px;">- długoterminowe aktywa finansowe</td><td class='val'>{fmt_pln(sums['ak_a_iv_2'])}</td><td>VI. Zysk (strata) netto</td><td class='val'><strong>{fmt_pln(sums['pa_a_vi'])}</strong></td></tr>
-                <tr><td>V. Długoterminowe rozliczenia międzyokresowe</td><td class='val'>{fmt_pln(sums['ak_a_v'])}</td><td>VII. Odpisy z zysku netto w ciągu roku obrotowego (wielkość ujemna)</td><td class='val'>{fmt_pln(sums['pa_a_vii'])}</td></tr>
+                <tr><td><b>A.I.</b> Wartości niematerialne i prawne</td><td class='val'>{fmt_pln(sums['ak_a_i'])}</td><td><b>A.I.</b> Kapitał (fundusz) podstawowy</td><td class='val'>{fmt_pln(sums['pa_a_i'])}</td></tr>
+                <tr><td><b>A.II.</b> Rzeczowe aktywa trwałe, w tym:</td><td class='val'>{fmt_pln(aktywa_a_ii)}</td><td><b>A.II.</b> Kapitał (fundusz) zapasowy, w tym:</td><td class='val'>{fmt_pln(pasywa_a_ii)}</td></tr>
+                <tr><td style="padding-left: 20px;"><b>A.II.1.</b> - środki trwałe</td><td class='val'>{fmt_pln(sums['ak_a_ii_1'])}</td><td style="padding-left: 20px;"><b>A.II.1.</b> - nadwyżka wartości sprzedaży (wartości emisyjnej) nad wartością nominalną udziałów (akcji)</td><td class='val'>{fmt_pln(sums['pa_a_ii_1'])}</td></tr>
+                <tr><td style="padding-left: 20px;"><b>A.II.2.</b> - środki trwałe w budowie</td><td class='val'>{fmt_pln(sums['ak_a_ii_2'])}</td><td><b>A.III.</b> Kapitał (fundusz) z aktualizacji wyceny, w tym:</td><td class='val'>{fmt_pln(pasywa_a_iii)}</td></tr>
+                <tr><td><b>A.III.</b> Należności długoterminowe</td><td class='val'>{fmt_pln(sums['ak_a_iii'])}</td><td style="padding-left: 20px;"><b>A.III.1.</b> - z tytułu aktualizacji wartości godziwej</td><td class='val'>{fmt_pln(sums['pa_a_iii_1'])}</td></tr>
+                <tr><td><b>A.IV.</b> Inwestycje długoterminowe, w tym:</td><td class='val'>{fmt_pln(aktywa_a_iv)}</td><td><b>A.IV.</b> Pozostałe kapitały (fundusze) rezerwowe</td><td class='val'>{fmt_pln(sums['pa_a_iv'])}</td></tr>
+                <tr><td style="padding-left: 20px;"><b>A.IV.1.</b> - nieruchomości</td><td class='val'>{fmt_pln(sums['ak_a_iv_1'])}</td><td><b>A.V.</b> Zysk (strata) z lat ubiegłych</td><td class='val'>{fmt_pln(sums['pa_a_v'])}</td></tr>
+                <tr><td style="padding-left: 20px;"><b>A.IV.2.</b> - długoterminowe aktywa finansowe</td><td class='val'>{fmt_pln(sums['ak_a_iv_2'])}</td><td><b>A.VI.</b> Zysk (strata) netto</td><td class='val'><strong>{fmt_pln(sums['pa_a_vi'])}</strong></td></tr>
+                <tr><td><b>A.V.</b> Długoterminowe rozliczenia międzyokresowe</td><td class='val'>{fmt_pln(sums['ak_a_v'])}</td><td><b>A.VII.</b> Odpisy z zysku netto w ciągu roku obrotowego (wielkość ujemna)</td><td class='val'>{fmt_pln(sums['pa_a_vii'])}</td></tr>
                 
                 <tr><td class='section-header'>B. Aktywa obrotowe</td><td class='section-header val'>{fmt_pln(aktywa_b)}</td><td class='section-header'>B. Zobowiązania i rezerwy na zobowiązania</td><td class='section-header val'>{fmt_pln(pasywa_b)}</td></tr>
-                <tr><td>I. Zapasy</td><td class='val'>{fmt_pln(sums['ak_b_i'])}</td><td>I. Rezerwy na zobowiązania, w tym:</td><td class='val'>{fmt_pln(pasywa_b_i)}</td></tr>
-                <tr><td>II. Należności krótkoterminowe, w tym:</td><td class='val'>{fmt_pln(aktywa_b_ii_a)}</td><td style="padding-left: 20px;">- rezerwa na świadczenia emerytalne i podobne</td><td class='val'>{fmt_pln(sums['pa_b_i_1'])}</td></tr>
-                <tr><td style="padding-left: 20px;">a) z tytułu dostaw i usług, w tym:</td><td class='val'>{fmt_pln(aktywa_b_ii_a)}</td><td>II. Zobowiązania długoterminowe, w tym:</td><td class='val'>{fmt_pln(pasywa_b_ii)}</td></tr>
-                <tr><td style="padding-left: 40px;">- do 12 miesięcy</td><td class='val'>{fmt_pln(sums['ak_b_ii_a_1'])}</td><td style="padding-left: 20px;">- z tytułu kredytów i pożyczek</td><td class='val'>{fmt_pln(sums['pa_b_ii_1'])}</td></tr>
-                <tr><td style="padding-left: 40px;">- powyżej 12 miesięcy</td><td class='val'>{fmt_pln(sums['ak_b_ii_a_2'])}</td><td>III. Zobowiązania krótkoterminowe, w tym:</td><td class='val'>{fmt_pln(pasywa_b_iii)}</td></tr>
-                <tr><td>III. Inwestycje krótkoterminowe, w tym:</td><td class='val'>{fmt_pln(aktywa_b_iii_a)}</td><td style="padding-left: 20px;">a) z tytułu kredytów i pożyczek</td><td class='val'>{fmt_pln(sums['pa_b_iii_a'])}</td></tr>
-                <tr><td style="padding-left: 20px;">a) krótkoterminowe aktywa finansowe, w tym:</td><td class='val'>{fmt_pln(aktywa_b_iii_a)}</td><td style="padding-left: 20px;">b) z tytułu dostaw i usług, w tym:</td><td class='val'>{fmt_pln(pasywa_b_iii_b)}</td></tr>
-                <tr><td style="padding-left: 40px;">- środki pieniężne w kasie i na rachunkach</td><td class='val'>{fmt_pln(sums['ak_b_iii_a_1'])}</td><td style="padding-left: 40px;">- do 12 miesięcy</td><td class='val'>{fmt_pln(sums['pa_b_iii_b_1'])}</td></tr>
-                <tr><td>IV. Krótkoterminowe rozliczenia międzyokresowe</td><td class='val'>{fmt_pln(sums['ak_b_iv'])}</td><td style="padding-left: 40px;">- powyżej 12 miesięcy</td><td class='val'>{fmt_pln(sums['pa_b_iii_b_2'])}</td></tr>
-                <tr><td class='section-header'>C. Należne wpłaty na kapitał (fundusz) podstawowy</td><td class='section-header val'>{fmt_pln(sums['ak_c'])}</td><td style="padding-left: 20px;">c) fundusze specjalne</td><td class='val'>{fmt_pln(sums['pa_b_iii_c'])}</td></tr>
-                <tr><td class='section-header'>D. Udziały (akcje) własne</td><td class='section-header val'>{fmt_pln(sums['ak_d'])}</td><td>IV. Rozliczenia międzyokresowe</td><td class='val'>{fmt_pln(sums['pa_b_iv'])}</td></tr>
+                <tr><td><b>B.I.</b> Zapasy</td><td class='val'>{fmt_pln(sums['ak_b_i'])}</td><td><b>B.I.</b> Rezerwy na zobowiązania, w tym:</td><td class='val'>{fmt_pln(pasywa_b_i)}</td></tr>
+                <tr><td><b>B.II.</b> Należności krótkoterminowe, w tym:</td><td class='val'>{fmt_pln(aktywa_b_ii)}</td><td style="padding-left: 20px;"><b>B.I.1.</b> - rezerwa na świadczenia emerytalne i podobne</td><td class='val'>{fmt_pln(sums['pa_b_i_1'])}</td></tr>
+                <tr><td style="padding-left: 20px;"><b>B.II.a)</b> z tytułu dostaw i usług, w tym:</td><td class='val'>{fmt_pln(aktywa_b_ii_a)}</td><td><b>B.II.</b> Zobowiązania długoterminowe, w tym:</td><td class='val'>{fmt_pln(pasywa_b_ii)}</td></tr>
+                <tr><td style="padding-left: 40px;"><b>B.II.a)1.</b> - do 12 miesięcy</td><td class='val'>{fmt_pln(sums['ak_b_ii_a_1'])}</td><td style="padding-left: 20px;"><b>B.II.1.</b> - z tytułu kredytów i pożyczek</td><td class='val'>{fmt_pln(sums['pa_b_ii_1'])}</td></tr>
+                <tr><td style="padding-left: 40px;"><b>B.II.a)2.</b> - powyżej 12 miesięcy</td><td class='val'>{fmt_pln(sums['ak_b_ii_a_2'])}</td><td><b>B.III.</b> Zobowiązania krótkoterminowe, w tym:</td><td class='val'>{fmt_pln(pasywa_b_iii)}</td></tr>
+                <tr><td><b>B.III.</b> Inwestycje krótkoterminowe, w tym:</td><td class='val'>{fmt_pln(aktywa_b_iii)}</td><td style="padding-left: 20px;"><b>B.III.a)</b> z tytułu kredytów i pożyczek</td><td class='val'>{fmt_pln(sums['pa_b_iii_a'])}</td></tr>
+                <tr><td style="padding-left: 20px;"><b>B.III.a)</b> krótkoterminowe aktywa finansowe, w tym:</td><td class='val'>{fmt_pln(aktywa_b_iii_a)}</td><td style="padding-left: 20px;"><b>B.III.b)</b> z tytułu dostaw i usług, w tym:</td><td class='val'>{fmt_pln(pasywa_b_iii_b)}</td></tr>
+                <tr><td style="padding-left: 40px;"><b>B.III.a)1.</b> - środki pieniężne w kasie i na rachunkach</td><td class='val'>{fmt_pln(sums['ak_b_iii_a_1'])}</td><td style="padding-left: 40px;"><b>B.III.b)1.</b> - do 12 miesięcy</td><td class='val'>{fmt_pln(sums['pa_b_iii_b_1'])}</td></tr>
+                <tr><td><b>B.IV.</b> Krótkoterminowe rozliczenia międzyokresowe</td><td class='val'>{fmt_pln(sums['ak_b_iv'])}</td><td style="padding-left: 40px;"><b>B.III.b)2.</b> - powyżej 12 miesięcy</td><td class='val'>{fmt_pln(sums['pa_b_iii_b_2'])}</td></tr>
+                <tr><td class='section-header'>C. Należne wpłaty na kapitał (fundusz) podstawowy</td><td class='section-header val'>{fmt_pln(sums['ak_c'])}</td><td style="padding-left: 20px;"><b>B.III.c)</b> fundusze specjalne</td><td class='val'>{fmt_pln(sums['pa_b_iii_c'])}</td></tr>
+                <tr><td class='section-header'>D. Udziały (akcje) własne</td><td class='section-header val'>{fmt_pln(sums['ak_d'])}</td><td><b>B.IV.</b> Rozliczenia międzyokresowe</td><td class='val'>{fmt_pln(sums['pa_b_iv'])}</td></tr>
                 
                 <tr><td class='main-total'>Aktywa razem</td><td class='main-total val'>{fmt_pln(razem_aktywa)}</td><td class='main-total'>Pasywa razem</td><td class='main-total val'>{fmt_pln(razem_pasywa)}</td></tr>
             </table>
