@@ -44,7 +44,7 @@
         .t-input-row { display: flex; flex-direction: column; gap: 5px; margin-top: auto; padding-top: 10px;}
         .t-input-row input { width: 100%; box-sizing: border-box; padding: 4px; font-size: 0.85em; }
         
-        /* Styl zamykania kont (akademicki) */
+        /* Styl zamykania kont */
         .t-footer { width: 100%; display: flex; flex-direction: column; font-size: 0.85em;}
         .t-closure-obroty { display: flex; border-top: 1px solid #000; padding-top: 2px; }
         .t-closure-sk { display: flex; padding-bottom: 2px; }
@@ -52,10 +52,16 @@
         .col-half { width: 50%; padding: 0 5px; box-sizing: border-box; }
         .border-mid { border-right: 3px solid #2c3e50; }
         
-        /* Tabele */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9em; background: #fff; }
-        th, td { border: 1px solid #7f8c8d; padding: 6px; text-align: left; vertical-align: top; }
-        th { background-color: #bdc3c7; text-align: center; font-size: 1em; }
+        /* Tabele Ogólne (Zestawienie Obrotów i Sald) */
+        .generic-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9em; background: #fff; }
+        .generic-table th, .generic-table td { border: 1px solid #7f8c8d; padding: 6px; text-align: left; vertical-align: top; }
+        .generic-table th { background-color: #bdc3c7; text-align: center; font-size: 1em; }
+        
+        /* Tabele Bilansu - Symetryczne i zawijające tekst */
+        .balance-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9em; background: #fff; table-layout: fixed; }
+        .balance-table th, .balance-table td { border: 1px solid #7f8c8d; padding: 6px; text-align: left; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; }
+        .balance-table th { background-color: #bdc3c7; text-align: center; font-size: 1em; }
+
         .section-header { font-weight: bold; background-color: #ecf0f1; }
         .main-total { font-weight: bold; font-size: 1.1em; background-color: #95a5a6; color: white; }
         .val { text-align: right; }
@@ -132,13 +138,13 @@
                     <option disabled style="font-weight:bold; color:#333;">A. Kapitał (fundusz) własny</option>
                     <option value="pa_a_i">A.I. Kapitał (fundusz) podstawowy</option>
                     <option value="pa_a_ii">A.II. Kapitał (fundusz) zapasowy, w tym:</option>
-                    <option value="pa_a_ii_1">&nbsp;&nbsp;A.II.1. - nadwyżka wartości sprzedaży...</option>
+                    <option value="pa_a_ii_1">&nbsp;&nbsp;A.II.1. - nadwyżka wartości sprzedaży (wartości emisyjnej) nad wartością nominalną udziałów (akcji)</option>
                     <option value="pa_a_iii">A.III. Kapitał (fundusz) z aktualizacji wyceny, w tym:</option>
                     <option value="pa_a_iii_1">&nbsp;&nbsp;A.III.1. - z tytułu aktualizacji wartości godziwej</option>
                     <option value="pa_a_iv">A.IV. Pozostałe kapitały (fundusze) rezerwowe</option>
                     <option value="pa_a_v">A.V. Zysk (strata) z lat ubiegłych</option>
                     <option value="pa_a_vi">A.VI. Zysk (strata) netto</option>
-                    <option value="pa_a_vii">A.VII. Odpisy z zysku netto...</option>
+                    <option value="pa_a_vii">A.VII. Odpisy z zysku netto w ciągu roku obrotowego (wielkość ujemna)</option>
                     
                     <option disabled style="font-weight:bold; color:#333;">B. Zobowiązania i rezerwy na zobowiązania</option>
                     <option value="pa_b_i">B.I. Rezerwy na zobowiązania, w tym:</option>
@@ -586,7 +592,7 @@
         def generate_trial_balance(e):
             html = get_report_header("Zestawienie obrotów i sald kont księgi głównej")
             html += """
-            <table>
+            <table class="generic-table">
                 <tr>
                     <th rowspan="2">Nazwa konta</th>
                     <th colspan="2">Salda na dzień otwarcia ksiąg rachunkowych</th>
@@ -711,7 +717,13 @@
 
             html = get_report_header("Bilans")
             html += f"""
-            <table>
+            <table class="balance-table">
+                <colgroup>
+                    <col style="width: 35%;">
+                    <col style="width: 15%;">
+                    <col style="width: 35%;">
+                    <col style="width: 15%;">
+                </colgroup>
                 <tr><th colspan="2">AKTYWA</th><th colspan="2">PASYWA</th></tr>
                 
                 <tr><td class='section-header'>A. Aktywa trwałe</td><td class='section-header val'>{fmt_pln(aktywa_a)}</td><td class='section-header'>A. Kapitał (fundusz) własny</td><td class='section-header val'>{fmt_pln(pasywa_a)}</td></tr>
