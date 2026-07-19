@@ -89,13 +89,14 @@
             
             <div id="t-accounts-container"></div>
             
-            <button class="close-btn" py-click="close_t_accounts">ZAMKNIJ KONTA (Pociągnij salda i wygeneruj podsumowania)</button>
+            <button class="close-btn" id="toggle-btn" py-click="toggle_t_accounts">ZAMKNIJ KONTA (Pociągnij salda i wygeneruj podsumowania)</button>
         </div>
 
         <!-- SEKCJA 2: RĘCZNE WPROWADZANIE -->
         <div class="section">
             <h3>Bezpośrednie wprowadzanie do bilansu (Opcjonalnie)</h3>
             <div class="input-group">
+                <input type="text" id="item_number" placeholder="Nr (np. 1)" style="width: 80px;">
                 <input type="text" id="amount" placeholder="Kwota (np. 1 000 000,50)">
                 <select id="category">
                     <option value="ak_a_i">AKTYWA - A.I. Wartości niematerialne i prawne</option>
@@ -138,8 +139,8 @@
 
         CHART_OF_ACCOUNTS = {
             "010": ["Środki trwałe", "A", "ak_a_ii"],
-            "010-1": ["Grunty (w tym prawo użytkowania wieczystego)", "A", "ak_a_ii"],
-            "010-2": ["Budynki, lokale, prawa do lokali...", "A", "ak_a_ii"],
+            "010-1": ["Grunty (w tym prawo użytkowania wieczystego gruntu)", "A", "ak_a_ii"],
+            "010-2": ["Budynki, lokale, prawa do lokali, obiekty inżynierii lądowej i wodnej", "A", "ak_a_ii"],
             "010-3": ["Urządzenia techniczne i maszyny", "A", "ak_a_ii"],
             "010-4": ["Środki transportu", "A", "ak_a_ii"],
             "010-5": ["Inne środki trwałe", "A", "ak_a_ii"],
@@ -152,14 +153,15 @@
             "030-5": ["Inne długoterminowe aktywa finansowe", "A", "ak_a_iv"],
             "030-6": ["Inne inwestycje długoterminowe", "A", "ak_a_iv"],
             "070": ["Umorzenie środków trwałych", "A_contra", "ak_a_ii"],
-            "070-1": ["Umorzenie gruntów...", "A_contra", "ak_a_ii"],
-            "070-2": ["Umorzenie budynków...", "A_contra", "ak_a_ii"],
-            "070-3": ["Umorzenie urządzeń technicznych...", "A_contra", "ak_a_ii"],
+            "070-1": ["Umorzenie gruntów (w tym prawa użytkowania wieczystego gruntu)", "A_contra", "ak_a_ii"],
+            "070-2": ["Umorzenie budynków, lokali, praw do lokali, obiektów inżynierii lądowej i wodnej", "A_contra", "ak_a_ii"],
+            "070-3": ["Umorzenie urządzeń technicznych i maszyn", "A_contra", "ak_a_ii"],
             "070-4": ["Umorzenie środków transportu", "A_contra", "ak_a_ii"],
             "070-5": ["Umorzenie innych środków trwałych", "A_contra", "ak_a_ii"],
             "075": ["Umorzenie wartości niematerialnych i prawnych", "A_contra", "ak_a_i"],
             "080": ["Środki trwałe w budowie", "A", "ak_a_ii"],
             "099": ["Konta pozabilansowe", "None", ""],
+            "099-3": ["Środki trwałe w likwidacji", "None", ""],
 
             "100": ["Kasa", "A", "ak_b_iii"],
             "130": ["Rachunki bankowe podstawowe", "A", "ak_b_iii"],
@@ -181,19 +183,32 @@
             "202": ["Rozrachunki z dostawcami", "AP", "ak_b_ii", "pa_b_iii"],
             "220": ["Rozrachunki publicznoprawne", "AP", "ak_b_ii", "pa_b_iii"],
             "220-1": ["Rozrachunki z tytułu VAT", "AP", "ak_b_ii", "pa_b_iii"],
-            "220-2": ["Rozrachunki z tytułu podatku (PIT)", "AP", "ak_b_ii", "pa_b_iii"],
-            "220-3": ["Rozrachunki z tytułu podatku (CIT)", "AP", "ak_b_ii", "pa_b_iii"],
+            "220-2": ["Rozrachunki z tytułu podatku dochodowego od osób fizycznych", "AP", "ak_b_ii", "pa_b_iii"],
+            "220-3": ["Rozrachunki z tytułu podatku dochodowego od osób prawnych", "AP", "ak_b_ii", "pa_b_iii"],
             "220-4": ["Rozrachunki z ZUS", "AP", "ak_b_ii", "pa_b_iii"],
-            "221": ["Rozliczenie VAT", "AP", "ak_b_ii", "pa_b_iii"],
+            "220-6": ["Pozostałe rozrachunki publicznoprawne", "AP", "ak_b_ii", "pa_b_iii"],
+            "221": ["Rozliczenie VAT należnego i naliczonego", "AP", "ak_b_ii", "pa_b_iii"],
+            "221-1": ["VAT należny", "AP", "ak_b_ii", "pa_b_iii"],
+            "221-2": ["VAT naliczony", "AP", "ak_b_ii", "pa_b_iii"],
             "230": ["Rozrachunki z tytułu wynagrodzeń", "AP", "ak_b_ii", "pa_b_iii"],
             "234": ["Pozostałe rozrachunki z pracownikami", "AP", "ak_b_ii", "pa_b_iii"],
-            "240": ["Rozrachunki z tyt. nabycia/rozchodu aktywów", "AP", "ak_b_ii", "pa_b_iii"],
-            "241": ["Udzielone pożyczki", "A", "ak_b_iii"],
-            "242": ["Otrzymane pożyczki", "P", "pa_b_iii"],
-            "245": ["Należne wpłaty na kapitał własny", "A", "ak_c"],
+            "240": ["Rozrachunki z tytułu nabycia i rozchodu niefinansowych aktywów trwałych", "AP", "ak_b_ii", "pa_b_iii"],
+            "240-1": ["Rozrachunki z tytułu nabycia niefinansowych aktywów trwałych", "AP", "ak_b_ii", "pa_b_iii"],
+            "240-2": ["Rozrachunki z tytułu rozchodu niefinansowych aktywów trwałych", "AP", "ak_b_ii", "pa_b_iii"],
+            "241": ["Udzielone pożyczki (instrumenty finansowe)", "A", "ak_b_iii"],
+            "241-1": ["Udzielone pożyczki - długoterminowe", "A", "ak_a_iv"],
+            "241-2": ["Udzielone pożyczki - krótkoterminowe", "A", "ak_b_iii"],
+            "242": ["Otrzymane pożyczki (instrumenty finansowe)", "P", "pa_b_iii"],
+            "242-1": ["Otrzymane pożyczki - długoterminowe", "P", "pa_b_ii"],
+            "242-2": ["Otrzymane pożyczki - krótkoterminowe", "P", "pa_b_iii"],
+            "245": ["Należne wpłaty na kapitał (fundusz) własny", "A", "ak_c"],
             "249": ["Pozostałe rozrachunki", "AP", "ak_b_ii", "pa_b_iii"],
 
             "300": ["Rozliczenie zakupu", "AP", "ak_b_i", "pa_b_iii"],
+            "300-1": ["Rozliczenie zakupu wartości niematerialnych i prawnych", "AP", "ak_b_i", "pa_b_iii"],
+            "300-2": ["Rozliczenie zakupu środków trwałych i środków trwałych w budowie", "AP", "ak_b_i", "pa_b_iii"],
+            "300-3": ["Rozliczenie zakupu materiałów", "AP", "ak_b_i", "pa_b_iii"],
+            "300-4": ["Rozliczenie zakupu towarów", "AP", "ak_b_i", "pa_b_iii"],
             "310": ["Materiały", "A", "ak_b_i"],
             "330": ["Towary", "A", "ak_b_i"],
 
@@ -207,31 +222,56 @@
             "490": ["Rozliczenie kosztów rodzajowych", "E", ""],
 
             "500": ["Koszty działalności podstawowej", "E", ""],
+            "500-1": ["Koszty produkcji wyrobów", "E", ""],
+            "500-2": ["Koszty działalności usługowej", "E", ""],
+            "500-3": ["Koszty działalności handlowej", "E", ""],
             "540": ["Koszty sprzedaży", "E", ""],
             "550": ["Koszty ogólnego zarządu", "E", ""],
 
             "600": ["Wyroby (produkty)", "A", "ak_b_i"],
+            "600-1": ["Wyroby (produkty) gotowe", "A", "ak_b_i"],
+            "600-2": ["Półprodukty", "A", "ak_b_i"],
+            "600-3": ["Produkty w toku", "A", "ak_b_i"],
             "640": ["Rozliczenia międzyokresowe", "AP", "ak_b_iv", "pa_b_iv"],
 
             "700": ["Przychody ze sprzedaży produktów", "R", ""],
+            "700-1": ["Przychody ze sprzedaży wyrobów gotowych", "R", ""],
+            "700-2": ["Przychody ze sprzedaży usług", "R", ""],
             "711": ["Koszt wytworzenia sprzedanych produktów", "E", ""],
+            "711-1": ["Koszt wytworzenia sprzedanych wyrobów gotowych", "E", ""],
+            "711-2": ["Koszt wytworzenia sprzedanych usług", "E", ""],
             "730": ["Przychody ze sprzedaży towarów", "R", ""],
             "731": ["Wartość sprzedanych towarów", "E", ""],
             "750": ["Przychody finansowe", "R", ""],
+            "750-1": ["Dywidendy i udziały w zyskach", "R", ""],
+            "750-2": ["Odsetki", "R", ""],
+            "750-3": ["Przychody z tytułu rozchodu aktywów finansowych", "R", ""],
+            "750-4": ["Aktualizacja wartości aktywów finansowych", "R", ""],
+            "750-6": ["Inne przychody finansowe", "R", ""],
             "751": ["Koszty finansowe", "E", ""],
+            "751-1": ["Odsetki", "E", ""],
+            "751-2": ["Koszty z tytułu rozchodu aktywów finansowych", "E", ""],
+            "751-3": ["Aktualizacja wartości aktywów finansowych", "E", ""],
+            "751-5": ["Inne koszty finansowe", "E", ""],
             "760": ["Pozostałe przychody operacyjne", "R", ""],
+            "760-1": ["Przychody z tytułu rozchodu niefinansowych aktywów trwałych", "R", ""],
+            "760-3": ["Aktualizacja wartości aktywów niefinansowych", "R", ""],
+            "760-4": ["Inne pozostałe przychody operacyjne", "R", ""],
             "761": ["Pozostałe koszty operacyjne", "E", ""],
+            "761-1": ["Koszty z tytułu rozchodu niefinansowych aktywów trwałych", "E", ""],
+            "761-2": ["Aktualizacja wartości aktywów niefinansowych", "E", ""],
+            "761-3": ["Inne pozostałe koszty operacyjne", "E", ""],
 
             "800": ["Kapitał (fundusz) podstawowy", "P", "pa_a_i"],
             "811": ["Kapitał (fundusz) zapasowy", "P", "pa_a_ii"],
-            "812": ["Pozostałe kapitały rezerwowe", "P", "pa_a_iv"],
+            "812": ["Pozostałe kapitały (fundusze) rezerwowe", "P", "pa_a_iv"],
             "813": ["Kapitał (fundusz) z aktualizacji wyceny", "P", "pa_a_iii"],
             "820": ["Rozliczenie wyniku finansowego", "P", "pa_a_v"],
             "830": ["Rezerwy na zobowiązania", "P", "pa_b_i"],
             "840": ["Rozliczenia międzyokresowe przychodów", "P", "pa_b_iv"],
             "850": ["Fundusze specjalne", "P", "pa_b_iii"],
             "860": ["Wynik finansowy", "P", "pa_a_vi"],
-            "870": ["Podatek dochodowy", "E", ""]
+            "870": ["Podatek dochodowy i inne obowiązkowe obciążenia wyniku finansowego", "E", ""]
         }
 
         GROUP_NAMES = {
@@ -285,6 +325,7 @@
 
         def edit_manual(index):
             item = manual_store[index]
+            js.document.getElementById("item_number").value = item.get('no', '')
             js.document.getElementById("amount").value = fmt_pln(item['amount'])
             js.document.getElementById("category").value = item['cat']
             manual_store.pop(index)
@@ -301,7 +342,9 @@
                 li.style.borderBottom = "1px solid #ddd"
                 li.style.padding = "5px 0"
                 cat_name = js.document.getElementById("category").querySelector(f"option[value='{item['cat']}']").innerText
-                li.innerHTML = f"<strong>{fmt_pln(item['amount'])}</strong> -> {cat_name} "
+                
+                no_str = f"<strong>{item.get('no', '')})</strong> " if item.get('no') else ""
+                li.innerHTML = f"{no_str}<strong>{fmt_pln(item['amount'])}</strong> -> {cat_name} "
                 
                 btn_del = js.document.createElement("button")
                 btn_del.className = "delete-btn"
@@ -318,13 +361,15 @@
                 ul.appendChild(li)
 
         def add_manual_item(e):
+            item_no = js.document.getElementById("item_number").value
             amt_str = js.document.getElementById("amount").value
             cat = js.document.getElementById("category").value
             if not amt_str: return
             try:
                 amt = parse_pln(amt_str)
-                manual_store.append({"cat": cat, "amount": amt})
+                manual_store.append({"no": item_no, "cat": cat, "amount": amt})
                 render_manual_list()
+                js.document.getElementById("item_number").value = ""
                 js.document.getElementById("amount").value = ""
             except:
                 js.alert("Niepoprawny format kwoty!")
@@ -334,15 +379,18 @@
             code = js.document.getElementById("t_account_select").value
             if code not in t_accounts_store:
                 t_accounts_store[code] = {"wn": [], "ma": []}
+                # Po dodaniu nowego konta nie wymuszamy otwierania wszystkich jeśli były zamknięte, 
+                # ale dla zachowania logiki można zresetować flagę zamknięcia, by użytkownik mógł je uzupełnić.
                 global accounts_closed
                 accounts_closed = False
+                update_toggle_btn()
                 render_t_accounts()
             else:
                 js.alert("To konto jest już otwarte na planszy!")
 
         def add_operation(code, side):
             if accounts_closed:
-                js.alert("Konta są zamknięte! Edytuj dowolną pozycję, aby je ponownie otworzyć.")
+                js.alert("Konta są zamknięte! Otwórz je przyciskiem, aby edytować.")
                 return
             op_input = js.document.getElementById(f"op_{side}_{code}").value
             amt_input = js.document.getElementById(f"amt_{side}_{code}").value
@@ -367,6 +415,7 @@
                 t_accounts_store[code][side][idx] = {"op": new_op_str, "amt": amt}
                 global accounts_closed
                 accounts_closed = False
+                update_toggle_btn()
                 render_t_accounts()
             except ValueError:
                 js.alert("Niepoprawny format kwoty!")
@@ -376,11 +425,21 @@
                 t_accounts_store[code][side].pop(idx)
                 global accounts_closed
                 accounts_closed = False
+                update_toggle_btn()
                 render_t_accounts()
 
         js.window.add_op_py = add_operation
         js.window.edit_op_py = edit_operation
         js.window.del_op_py = delete_operation
+
+        def update_toggle_btn():
+            btn = js.document.getElementById("toggle-btn")
+            if accounts_closed:
+                btn.innerText = "OTWÓRZ KONTA (Powrót do edycji)"
+                btn.style.backgroundColor = "#e67e22"
+            else:
+                btn.innerText = "ZAMKNIJ KONTA (Pociągnij salda i wygeneruj podsumowania)"
+                btn.style.backgroundColor = "#f39c12"
 
         def render_t_accounts():
             container = js.document.getElementById("t-accounts-container")
@@ -396,8 +455,8 @@
                 for idx, x in enumerate(data['ma']):
                     ma_html += f"<div class='t-row'><span><span class='op-actions'><button class='op-btn' onclick=\"window.del_op_py('{code}', 'ma', {idx})\">❌</button><button class='op-btn' onclick=\"window.edit_op_py('{code}', 'ma', {idx})\">✎</button></span> {fmt_pln(x['amt'])}</span> <span>({x['op']}</span></div>"
                 
-                sum_wn = sum([x['amt'] for x in data['wn']])
-                sum_ma = sum([x['amt'] for x in data['ma']])
+                sum_wn = round(sum([x['amt'] for x in data['wn']]), 2)
+                sum_ma = round(sum([x['amt'] for x in data['ma']]), 2)
                 
                 footer_html = ""
                 if accounts_closed:
@@ -405,10 +464,13 @@
                     sk_ma_text = ""
                     max_sum = max(sum_wn, sum_ma)
                     
-                    if sum_wn > sum_ma:
-                        sk_ma_text = f"{fmt_pln(sum_wn - sum_ma)} (Sk"
-                    elif sum_ma > sum_wn:
-                        sk_wn_text = f"Sk) {fmt_pln(sum_ma - sum_wn)}"
+                    # Konta przychodowe (R) i kosztowe (E) nie mają salda końcowego (Sk)
+                    if acc_info[1] not in ['R', 'E']:
+                        diff = round(sum_wn - sum_ma, 2)
+                        if diff > 0:
+                            sk_ma_text = f"{fmt_pln(diff)} (Sk"
+                        elif diff < 0:
+                            sk_wn_text = f"Sk) {fmt_pln(abs(diff))}"
                     
                     footer_html = f"""
                     <div class="t-footer">
@@ -463,9 +525,10 @@
                 html += acc_html
             container.innerHTML = html
 
-        def close_t_accounts(e):
+        def toggle_t_accounts(e):
             global accounts_closed
-            accounts_closed = True
+            accounts_closed = not accounts_closed
+            update_toggle_btn()
             render_t_accounts()
 
         # --- GENEROWANIE NAGŁÓWKA SPRAWOZDANIA ---
@@ -508,15 +571,15 @@
                 name = f"{code} {CHART_OF_ACCOUNTS[code][0]}"
                 
                 # BO to wpisy z numerem operacji "Sp" lub "BO" (bez względu na wielkość liter)
-                bo_dt = sum(x['amt'] for x in data['wn'] if x['op'].strip().lower() in ['sp', 'bo'])
-                bo_ct = sum(x['amt'] for x in data['ma'] if x['op'].strip().lower() in ['sp', 'bo'])
+                bo_dt = round(sum(x['amt'] for x in data['wn'] if x['op'].strip().lower() in ['sp', 'bo']), 2)
+                bo_ct = round(sum(x['amt'] for x in data['ma'] if x['op'].strip().lower() in ['sp', 'bo']), 2)
                 
                 # Reszta to obroty bieżące
-                ob_dt = sum(x['amt'] for x in data['wn'] if x['op'].strip().lower() not in ['sp', 'bo'])
-                ob_ct = sum(x['amt'] for x in data['ma'] if x['op'].strip().lower() not in ['sp', 'bo'])
+                ob_dt = round(sum(x['amt'] for x in data['wn'] if x['op'].strip().lower() not in ['sp', 'bo']), 2)
+                ob_ct = round(sum(x['amt'] for x in data['ma'] if x['op'].strip().lower() not in ['sp', 'bo']), 2)
                 
-                nar_dt = bo_dt + ob_dt
-                nar_ct = bo_ct + ob_ct
+                nar_dt = round(bo_dt + ob_dt, 2)
+                nar_ct = round(bo_ct + ob_ct, 2)
                 
                 sk_dt = max(0, nar_dt - nar_ct)
                 sk_ct = max(0, nar_ct - nar_dt)
@@ -549,7 +612,7 @@
             </table>
             """
             js.document.getElementById("zestawienie-output").innerHTML = html
-            js.document.getElementById("bilans-output").innerHTML = "" # Czyści bilans, by nie mieszać na ekranie
+            js.document.getElementById("bilans-output").innerHTML = "" 
             
             # Sprawdzenie poprawności księgowań (zasada podwójnego zapisu)
             if abs(tot_ob_dt - tot_ob_ct) > 0.01:
@@ -558,7 +621,7 @@
         # --- GENEROWANIE BILANSU ---
         def generate_balance(e):
             if t_accounts_store and not accounts_closed:
-                js.alert("Masz otwarte konta T-owe! Najpierw zamknij konta pomarańczowym przyciskiem.")
+                js.alert("Masz otwarte konta T-owe! Najpierw zamknij konta żółtym przyciskiem.")
                 return
 
             sums = {
