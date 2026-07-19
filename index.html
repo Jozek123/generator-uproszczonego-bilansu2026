@@ -274,9 +274,10 @@
             "870": ["Podatek dochodowy i inne obowiązkowe obciążenia wyniku finansowego", "E", ""]
         }
 
+        # POPRAWIONE NAZWY ZESPOŁÓW ZGODNIE Z WYKAZEM
         GROUP_NAMES = {
-            "0": "Zespół 0 - Majątek trwały",
-            "1": "Zespół 1 - Środki pieniężne, rachunki bankowe i inwestycje krótkoterminowe",
+            "0": "Zespół 0 - Aktywa trwałe",
+            "1": "Zespół 1 - Środki pieniężne, rachunki bankowe i inne krótkoterminowe aktywa finansowe",
             "2": "Zespół 2 - Rozrachunki i roszczenia",
             "3": "Zespół 3 - Materiały i towary",
             "4": "Zespół 4 - Koszty według rodzajów i ich rozliczenie",
@@ -368,6 +369,17 @@
             try:
                 amt = parse_pln(amt_str)
                 manual_store.append({"no": item_no, "cat": cat, "amount": amt})
+                
+                # FUNKCJA SORTUJĄCA (pozwala ułożyć np. "1", "2", "10" numerycznie, a nie alfabetycznie)
+                def get_sort_key(item):
+                    no_val = str(item.get('no', '')).strip()
+                    try:
+                        return (0, float(no_val))
+                    except ValueError:
+                        return (1, no_val)
+                
+                manual_store.sort(key=get_sort_key)
+                
                 render_manual_list()
                 js.document.getElementById("item_number").value = ""
                 js.document.getElementById("amount").value = ""
@@ -379,8 +391,6 @@
             code = js.document.getElementById("t_account_select").value
             if code not in t_accounts_store:
                 t_accounts_store[code] = {"wn": [], "ma": []}
-                # Po dodaniu nowego konta nie wymuszamy otwierania wszystkich jeśli były zamknięte, 
-                # ale dla zachowania logiki można zresetować flagę zamknięcia, by użytkownik mógł je uzupełnić.
                 global accounts_closed
                 accounts_closed = False
                 update_toggle_btn()
@@ -464,7 +474,6 @@
                     sk_ma_text = ""
                     max_sum = max(sum_wn, sum_ma)
                     
-                    # Konta przychodowe (R) i kosztowe (E) nie mają salda końcowego (Sk)
                     if acc_info[1] not in ['R', 'E']:
                         diff = round(sum_wn - sum_ma, 2)
                         if diff > 0:
@@ -565,16 +574,13 @@
             
             tot_bo_dt = tot_bo_ct = tot_ob_dt = tot_ob_ct = tot_nar_dt = tot_nar_ct = tot_sk_dt = tot_sk_ct = 0
 
-            # Sortujemy po numerze konta
             for code in sorted(t_accounts_store.keys()):
                 data = t_accounts_store[code]
                 name = f"{code} {CHART_OF_ACCOUNTS[code][0]}"
                 
-                # BO to wpisy z numerem operacji "Sp" lub "BO" (bez względu na wielkość liter)
                 bo_dt = round(sum(x['amt'] for x in data['wn'] if x['op'].strip().lower() in ['sp', 'bo']), 2)
                 bo_ct = round(sum(x['amt'] for x in data['ma'] if x['op'].strip().lower() in ['sp', 'bo']), 2)
                 
-                # Reszta to obroty bieżące
                 ob_dt = round(sum(x['amt'] for x in data['wn'] if x['op'].strip().lower() not in ['sp', 'bo']), 2)
                 ob_ct = round(sum(x['amt'] for x in data['ma'] if x['op'].strip().lower() not in ['sp', 'bo']), 2)
                 
@@ -584,7 +590,6 @@
                 sk_dt = max(0, nar_dt - nar_ct)
                 sk_ct = max(0, nar_ct - nar_dt)
                 
-                # Sumy końcowe do podsumowania
                 tot_bo_dt += bo_dt; tot_bo_ct += bo_ct
                 tot_ob_dt += ob_dt; tot_ob_ct += ob_ct
                 tot_nar_dt += nar_dt; tot_nar_ct += nar_ct
@@ -600,7 +605,6 @@
                 </tr>
                 """
             
-            # Wiersz podsumowania SUMA
             html += f"""
                 <tr style='font-weight: bold; background-color: #ecf0f1;'>
                     <td>SUMA</td>
@@ -614,7 +618,6 @@
             js.document.getElementById("zestawienie-output").innerHTML = html
             js.document.getElementById("bilans-output").innerHTML = "" 
             
-            # Sprawdzenie poprawności księgowań (zasada podwójnego zapisu)
             if abs(tot_ob_dt - tot_ob_ct) > 0.01:
                 js.alert("UWAGA! Obroty za okres Dt i Ct nie są sobie równe. Sprawdź poprawność księgowań!")
 
