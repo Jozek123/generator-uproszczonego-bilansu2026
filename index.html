@@ -81,9 +81,9 @@
         <div class="section">
             <h3>Księga Główna (Konta T-owe)</h3>
             <div class="input-group">
-                <label>Wybierz konto: 
-                    <select id="t_account_select" style="max-width: 500px;"></select>
-                </label>
+                <label>Wybierz konto: </label>
+                <input type="text" id="account_search" placeholder="Szukaj (np. Kasa, 130)..." py-input="filter_accounts" style="width: 200px;">
+                <select id="t_account_select" style="min-width: 400px; max-width: 500px;"></select>
                 <button py-click="add_t_account">Utwórz konto T-owe</button>
             </div>
             
@@ -274,33 +274,58 @@
             "870": ["Podatek dochodowy i inne obowiązkowe obciążenia wyniku finansowego", "E", ""]
         }
 
-        # POPRAWIONE NAZWY ZESPOŁÓW ZGODNIE Z WYKAZEM
+        # POPRAWIONE NAZWY ZESPOŁÓW NA BAZIE ZDJĘCIA Z PLIKU image_954c68.png
         GROUP_NAMES = {
             "0": "Zespół 0 - Aktywa trwałe",
-            "1": "Zespół 1 - Środki pieniężne, rachunki bankowe i inne krótkoterminowe aktywa finansowe",
+            "1": "Zespół 1 - Inwestycje krótkoterminowe, kredyty oraz udziały własne",
             "2": "Zespół 2 - Rozrachunki i roszczenia",
-            "3": "Zespół 3 - Materiały i towary",
-            "4": "Zespół 4 - Koszty według rodzajów i ich rozliczenie",
-            "5": "Zespół 5 - Koszty według typów działalności i ich rozliczenie",
+            "3": "Zespół 3 - Materiały, towary i rozliczenie zakupu",
+            "4": "Zespół 4 - Koszty w układzie rodzajowym (wg rodzajów) i ich rozliczenie",
+            "5": "Zespół 5 - Koszty w układzie kalkulacyjnym (funkcjonalnym)",
             "6": "Zespół 6 - Produkty i rozliczenia międzyokresowe",
             "7": "Zespół 7 - Przychody i koszty związane z ich osiągnięciem",
-            "8": "Zespół 8 - Kapitały (fundusze) własne, fundusze specjalne i wynik finansowy"
+            "8": "Zespół 8 - Kapitały własne, fundusze specjalne i wynik finansowy"
         }
 
-        def init_select():
+        def init_select(search_term=""):
+            search_term = search_term.lower()
             sel = js.document.getElementById("t_account_select")
             html = ""
             current_group = ""
+            
+            # Wyszukiwanie kont syntetycznych, które posiadają subkonta (aby je dezaktywować)
+            has_subaccounts = set()
+            for code in CHART_OF_ACCOUNTS.keys():
+                if "-" in code:
+                    parent_code = code.split("-")[0]
+                    has_subaccounts.add(parent_code)
+            
             for code, data in CHART_OF_ACCOUNTS.items():
+                display_text = f"{code} {data[0]}"
+                
+                # Filtrowanie wyszukiwarki
+                if search_term and search_term not in display_text.lower():
+                    continue
+                
                 group_prefix = code[0]
                 group_name = GROUP_NAMES.get(group_prefix, f"Zespół {group_prefix}")
+                
                 if group_name != current_group:
                     if current_group != "": html += "</optgroup>"
                     html += f"<optgroup label='{group_name}'>"
                     current_group = group_name
-                html += f"<option value='{code}'>{code} {data[0]}</option>"
+                
+                # Jeśli konto ma subkonta, jest wyszarzane i nie można go kliknąć
+                disabled = "disabled" if code in has_subaccounts else ""
+                html += f"<option value='{code}' {disabled}>{display_text}</option>"
+                
             if current_group != "": html += "</optgroup>"
             sel.innerHTML = html
+
+        # FUNKCJA WYSZUKIWARKI WYWOŁYWANA Z HTML
+        def filter_accounts(e):
+            search_text = js.document.getElementById("account_search").value
+            init_select(search_text)
 
         init_select()
 
@@ -370,7 +395,6 @@
                 amt = parse_pln(amt_str)
                 manual_store.append({"no": item_no, "cat": cat, "amount": amt})
                 
-                # FUNKCJA SORTUJĄCA (pozwala ułożyć np. "1", "2", "10" numerycznie, a nie alfabetycznie)
                 def get_sort_key(item):
                     no_val = str(item.get('no', '')).strip()
                     try:
@@ -388,7 +412,13 @@
 
         # --- FUNKCJE KONT T-OWYCH ---
         def add_t_account(e):
-            code = js.document.getElementById("t_account_select").value
+            select_elem = js.document.getElementById("t_account_select")
+            if select_elem.selectedIndex == -1: 
+                return # Zapobiega kliknięciu, jeśli nic nie ma na liście wyników
+                
+            code = select_elem.value
+            if not code: return
+            
             if code not in t_accounts_store:
                 t_accounts_store[code] = {"wn": [], "ma": []}
                 global accounts_closed
