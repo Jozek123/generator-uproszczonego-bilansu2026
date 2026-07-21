@@ -14,7 +14,7 @@
         .input-group { margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;}
         select, input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; }
         input[type="text"] { min-width: 150px; }
-        select { min-width: 550px; }
+        select { min-width: 450px; }
         button { padding: 8px 15px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s;}
         button:hover { background-color: #2980b9; }
         
@@ -52,9 +52,9 @@
         .col-half { width: 50%; padding: 0 5px; box-sizing: border-box; }
         .border-mid { border-right: 3px solid #2c3e50; }
         
-        /* Tabele Ogólne (Zestawienie Obrotów i Sald) */
+        /* Tabele Ogólne (Zestawienie Obrotów i Sald + Dziennik) */
         .generic-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9em; background: #fff; }
-        .generic-table th, .generic-table td { border: 1px solid #7f8c8d; padding: 6px; text-align: left; vertical-align: top; }
+        .generic-table th, .generic-table td { border: 1px solid #7f8c8d; padding: 6px; text-align: left; vertical-align: middle; }
         .generic-table th { background-color: #bdc3c7; text-align: center; font-size: 1em; }
         
         /* Tabele Bilansu - Symetryczne i zawijające tekst */
@@ -86,7 +86,7 @@
 
         <!-- SEKCJA 1: KONTA T-OWE -->
         <div class="section">
-            <h3>Księga Główna (Konta T-owe)</h3>
+            <h3>1. Księga Główna (Konta T-owe - wizualne)</h3>
             <div class="input-group">
                 <label>Wybierz konto: </label>
                 <input type="text" id="account_search" placeholder="Szukaj (np. Kasa, 130)..." py-input="filter_accounts" style="width: 200px;">
@@ -96,12 +96,51 @@
             
             <div id="t-accounts-container"></div>
             
-            <button class="close-btn" id="toggle-btn" py-click="toggle_t_accounts">ZAMKNIJ KONTA (Pociągnij salda i wygeneruj podsumowania)</button>
+            <button class="close-btn" id="toggle-btn" py-click="toggle_t_accounts">ZAMKNIJ KONTA T-OWE (Pociągnij salda)</button>
         </div>
 
-        <!-- SEKCJA 2: RĘCZNE WPROWADZANIE -->
+        <!-- SEKCJA 2: DEKRETACJA OPERACJI GOSPODARCZYCH -->
         <div class="section">
-            <h3>Bezpośrednie wprowadzanie do bilansu (Opcjonalnie)</h3>
+            <h3>2. Dekretacja operacji gospodarczych (Dziennik)</h3>
+            <div class="input-group">
+                <input type="text" id="j_op" placeholder="Nr op. (np. 1a)" style="width: 100px;">
+                <input type="text" id="j_amt" placeholder="Kwota (np. 1500,50)" style="width: 150px;">
+            </div>
+            <div class="input-group">
+                <label style="min-width: 100px;">Wn (Dt): </label>
+                <input type="text" id="j_search_wn" placeholder="Szukaj konta..." py-input="filter_j_wn" style="width: 150px;">
+                <select id="j_acc_wn" style="min-width: 350px;"></select>
+            </div>
+            <div class="input-group">
+                <label style="min-width: 100px;">Ma (Ct): </label>
+                <input type="text" id="j_search_ma" placeholder="Szukaj konta..." py-input="filter_j_ma" style="width: 150px;">
+                <select id="j_acc_ma" style="min-width: 350px;"></select>
+            </div>
+            <div class="input-group">
+                <button py-click="add_journal" style="background-color: #8e44ad; width: 250px;">Dodaj zapis (Dekretuj)</button>
+            </div>
+            
+            <table class="generic-table" style="margin-top: 15px;">
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="width: 8%;">Nr op.</th>
+                        <th rowspan="2" style="width: 15%;">Kwota</th>
+                        <th colspan="2">Konto (symbol, nazwa)</th>
+                        <th rowspan="2" style="width: 12%;">Akcje</th>
+                    </tr>
+                    <tr>
+                        <th style="width: 32.5%;">Wn (Dt)</th>
+                        <th style="width: 32.5%;">Ma (Ct)</th>
+                    </tr>
+                </thead>
+                <tbody id="journal-tbody">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SEKCJA 3: RĘCZNE WPROWADZANIE DO BILANSU -->
+        <div class="section">
+            <h3>3. Bezpośrednie wprowadzanie do bilansu (Opcjonalnie)</h3>
             <div class="input-group">
                 <input type="text" id="item_number" placeholder="Nr (np. 1)" style="width: 80px;">
                 <input type="text" id="amount" placeholder="Kwota (np. 1 000 000,50)">
@@ -173,6 +212,7 @@
 
     <script type="py">
         import js
+        import re
 
         CHART_OF_ACCOUNTS = {
             "010": ["Środki trwałe", "A", "ak_a_ii_1"],
@@ -315,9 +355,9 @@
             "8": "Zespół 8 - Kapitały własne, fundusze specjalne i wynik finansowy"
         }
 
-        def init_select(search_term=""):
+        def populate_select(select_id, search_term=""):
             search_term = search_term.lower()
-            sel = js.document.getElementById("t_account_select")
+            sel = js.document.getElementById(select_id)
             html = ""
             current_group = ""
             
@@ -326,6 +366,9 @@
                 if "-" in code:
                     parent_code = code.split("-")[0]
                     has_subaccounts.add(parent_code)
+                    
+            if select_id in ["j_acc_wn", "j_acc_ma"]:
+                html += "<option value=''>-- Brak / Nie dotyczy --</option>"
             
             for code, data in CHART_OF_ACCOUNTS.items():
                 display_text = f"{code} {data[0]}"
@@ -345,11 +388,13 @@
             if current_group != "": html += "</optgroup>"
             sel.innerHTML = html
 
-        def filter_accounts(e):
-            search_text = js.document.getElementById("account_search").value
-            init_select(search_text)
+        def filter_accounts(e): populate_select("t_account_select", js.document.getElementById("account_search").value)
+        def filter_j_wn(e): populate_select("j_acc_wn", js.document.getElementById("j_search_wn").value)
+        def filter_j_ma(e): populate_select("j_acc_ma", js.document.getElementById("j_search_ma").value)
 
-        init_select()
+        populate_select("t_account_select")
+        populate_select("j_acc_wn")
+        populate_select("j_acc_ma")
 
         def fmt_pln(val):
             if val == 0: return "0"
@@ -361,73 +406,89 @@
             val_str = str(val_str).replace(" ", "").replace(",", ".")
             return float(val_str)
 
+        def natural_sort_key(s):
+            return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', str(s))]
+
+        # ZMIENNE STANU
         manual_store = []
         t_accounts_store = {}
+        journal_store = []
         accounts_closed = False
 
-        def delete_manual(index):
-            manual_store.pop(index)
-            render_manual_list()
-
-        def edit_manual(index):
-            item = manual_store[index]
-            js.document.getElementById("item_number").value = item.get('no', '')
-            js.document.getElementById("amount").value = fmt_pln(item['amount'])
-            js.document.getElementById("category").value = item['cat']
-            manual_store.pop(index)
-            render_manual_list()
-
-        js.window.delete_manual_py = delete_manual
-        js.window.edit_manual_py = edit_manual
-
-        def render_manual_list():
-            ul = js.document.getElementById("items-list")
-            ul.innerHTML = ""
-            for i, item in enumerate(manual_store):
-                li = js.document.createElement("li")
-                li.style.borderBottom = "1px solid #ddd"
-                li.style.padding = "5px 0"
-                cat_name = js.document.getElementById("category").querySelector(f"option[value='{item['cat']}']").innerText
-                
-                no_str = f"<strong>{item.get('no', '')})</strong> " if item.get('no') else ""
-                li.innerHTML = f"{no_str}<strong>{fmt_pln(item['amount'])}</strong> -> {cat_name.replace('&nbsp;', '')} "
-                
-                btn_del = js.document.createElement("button")
-                btn_del.className = "delete-btn"
-                btn_del.innerText = "Usuń"
-                btn_del.setAttribute("onclick", f"window.delete_manual_py({i})")
-                
-                btn_edit = js.document.createElement("button")
-                btn_edit.className = "edit-btn"
-                btn_edit.innerText = "Edytuj ✎"
-                btn_edit.setAttribute("onclick", f"window.edit_manual_py({i})")
-                
-                li.appendChild(btn_del)
-                li.appendChild(btn_edit)
-                ul.appendChild(li)
-
-        def add_manual_item(e):
-            item_no = js.document.getElementById("item_number").value
-            amt_str = js.document.getElementById("amount").value
-            cat = js.document.getElementById("category").value
+        # --- LOGIKA DEKRETACJI (DZIENNIK) ---
+        def add_journal(e):
+            op_no = js.document.getElementById("j_op").value.strip()
+            amt_str = js.document.getElementById("j_amt").value
+            wn_code = js.document.getElementById("j_acc_wn").value
+            ma_code = js.document.getElementById("j_acc_ma").value
+            
             if not amt_str: return
             try:
                 amt = parse_pln(amt_str)
-                manual_store.append({"no": item_no, "cat": cat, "amount": amt})
+                if not wn_code and not ma_code:
+                    js.alert("Zaznacz konto po stronie Wn lub Ma!")
+                    return
+                    
+                journal_store.append({
+                    "no": op_no,
+                    "amount": amt,
+                    "wn_code": wn_code,
+                    "ma_code": ma_code
+                })
                 
-                def get_sort_key(item):
-                    no_val = str(item.get('no', '')).strip()
-                    try: return (0, float(no_val))
-                    except ValueError: return (1, no_val)
+                journal_store.sort(key=lambda x: natural_sort_key(x['no']))
+                render_journal()
                 
-                manual_store.sort(key=get_sort_key)
-                
-                render_manual_list()
-                js.document.getElementById("item_number").value = ""
-                js.document.getElementById("amount").value = ""
+                js.document.getElementById("j_op").value = ""
+                js.document.getElementById("j_amt").value = ""
+                js.document.getElementById("j_acc_wn").selectedIndex = 0
+                js.document.getElementById("j_acc_ma").selectedIndex = 0
+                js.document.getElementById("j_search_wn").value = ""
+                js.document.getElementById("j_search_ma").value = ""
+                populate_select("j_acc_wn")
+                populate_select("j_acc_ma")
             except:
                 js.alert("Niepoprawny format kwoty!")
 
+        def render_journal():
+            tbody = js.document.getElementById("journal-tbody")
+            html = ""
+            for i, item in enumerate(journal_store):
+                wn_display = f"{item['wn_code']} {CHART_OF_ACCOUNTS[item['wn_code']][0]}" if item['wn_code'] else ""
+                ma_display = f"{item['ma_code']} {CHART_OF_ACCOUNTS[item['ma_code']][0]}" if item['ma_code'] else ""
+                
+                html += f"""
+                <tr>
+                    <td style="text-align:center;">{item['no']}</td>
+                    <td class='val'>{fmt_pln(item['amount'])}</td>
+                    <td>{wn_display}</td>
+                    <td>{ma_display}</td>
+                    <td style="text-align:center;">
+                        <button class='edit-btn' onclick="window.edit_journal_py({i})">✎</button>
+                        <button class='delete-btn' onclick="window.del_journal_py({i})">❌</button>
+                    </td>
+                </tr>
+                """
+            tbody.innerHTML = html
+
+        def edit_journal(index):
+            item = journal_store[index]
+            js.document.getElementById("j_op").value = item['no']
+            js.document.getElementById("j_amt").value = fmt_pln(item['amount'])
+            js.document.getElementById("j_acc_wn").value = item['wn_code']
+            js.document.getElementById("j_acc_ma").value = item['ma_code']
+            journal_store.pop(index)
+            render_journal()
+            
+        def del_journal(index):
+            if js.confirm("Czy usunąć ten dekret?"):
+                journal_store.pop(index)
+                render_journal()
+
+        js.window.edit_journal_py = edit_journal
+        js.window.del_journal_py = del_journal
+
+        # --- LOGIKA KONT T-OWYCH (WIZUALNA) ---
         def add_t_account(e):
             select_elem = js.document.getElementById("t_account_select")
             if select_elem.selectedIndex == -1: return 
@@ -492,7 +553,7 @@
                 btn.innerText = "OTWÓRZ KONTA (Powrót do edycji)"
                 btn.style.backgroundColor = "#e67e22"
             else:
-                btn.innerText = "ZAMKNIJ KONTA (Pociągnij salda i wygeneruj podsumowania)"
+                btn.innerText = "ZAMKNIJ KONTA T-OWE (Pociągnij salda)"
                 btn.style.backgroundColor = "#f39c12"
 
         def render_t_accounts():
@@ -578,6 +639,83 @@
             update_toggle_btn()
             render_t_accounts()
 
+        # --- LOGIKA POZYCJI RĘCZNYCH W BILANSIE ---
+        def delete_manual(index):
+            manual_store.pop(index)
+            render_manual_list()
+
+        def edit_manual(index):
+            item = manual_store[index]
+            js.document.getElementById("item_number").value = item.get('no', '')
+            js.document.getElementById("amount").value = fmt_pln(item['amount'])
+            js.document.getElementById("category").value = item['cat']
+            manual_store.pop(index)
+            render_manual_list()
+
+        js.window.delete_manual_py = delete_manual
+        js.window.edit_manual_py = edit_manual
+
+        def render_manual_list():
+            ul = js.document.getElementById("items-list")
+            ul.innerHTML = ""
+            for i, item in enumerate(manual_store):
+                li = js.document.createElement("li")
+                li.style.borderBottom = "1px solid #ddd"
+                li.style.padding = "5px 0"
+                cat_name = js.document.getElementById("category").querySelector(f"option[value='{item['cat']}']").innerText
+                
+                no_str = f"<strong>{item.get('no', '')})</strong> " if item.get('no') else ""
+                li.innerHTML = f"{no_str}<strong>{fmt_pln(item['amount'])}</strong> -> {cat_name.replace('&nbsp;', '')} "
+                
+                btn_del = js.document.createElement("button")
+                btn_del.className = "delete-btn"
+                btn_del.innerText = "Usuń"
+                btn_del.setAttribute("onclick", f"window.delete_manual_py({i})")
+                
+                btn_edit = js.document.createElement("button")
+                btn_edit.className = "edit-btn"
+                btn_edit.innerText = "Edytuj ✎"
+                btn_edit.setAttribute("onclick", f"window.edit_manual_py({i})")
+                
+                li.appendChild(btn_del)
+                li.appendChild(btn_edit)
+                ul.appendChild(li)
+
+        def add_manual_item(e):
+            item_no = js.document.getElementById("item_number").value
+            amt_str = js.document.getElementById("amount").value
+            cat = js.document.getElementById("category").value
+            if not amt_str: return
+            try:
+                amt = parse_pln(amt_str)
+                manual_store.append({"no": item_no, "cat": cat, "amount": amt})
+                manual_store.sort(key=lambda x: natural_sort_key(x.get('no', '')))
+                render_manual_list()
+                js.document.getElementById("item_number").value = ""
+                js.document.getElementById("amount").value = ""
+            except:
+                js.alert("Niepoprawny format kwoty!")
+
+        # --- GENEROWANIE RAPORTÓW (SPINA T-KONTA Z DZIENNIKIEM) ---
+        def get_aggregated_data():
+            agg = {}
+            # 1. Pobierz z kont T-owych
+            for code, data in t_accounts_store.items():
+                if code not in agg: agg[code] = {"wn": [], "ma": []}
+                agg[code]["wn"].extend(data["wn"])
+                agg[code]["ma"].extend(data["ma"])
+                
+            # 2. Pobierz z dziennika dekretacji
+            for item in journal_store:
+                if item["wn_code"]:
+                    if item["wn_code"] not in agg: agg[item["wn_code"]] = {"wn": [], "ma": []}
+                    agg[item["wn_code"]]["wn"].append({"op": item["no"], "amt": item["amount"]})
+                if item["ma_code"]:
+                    if item["ma_code"] not in agg: agg[item["ma_code"]] = {"wn": [], "ma": []}
+                    agg[item["ma_code"]]["ma"].append({"op": item["no"], "amt": item["amount"]})
+                    
+            return agg
+
         def get_report_header(title):
             entity = js.document.getElementById("entity_name").value or "........................................"
             date = js.document.getElementById("report_date").value or "....................."
@@ -606,9 +744,11 @@
             """
             
             tot_bo_dt = tot_bo_ct = tot_ob_dt = tot_ob_ct = tot_nar_dt = tot_nar_ct = tot_sk_dt = tot_sk_ct = 0
+            
+            agg_data = get_aggregated_data()
 
-            for code in sorted(t_accounts_store.keys()):
-                data = t_accounts_store[code]
+            for code in sorted(agg_data.keys()):
+                data = agg_data[code]
                 name = f"{code} {CHART_OF_ACCOUNTS[code][0]}"
                 
                 bo_dt = round(sum(x['amt'] for x in data['wn'] if x['op'].strip().lower() in ['sp', 'bo']), 2)
@@ -649,11 +789,11 @@
             js.document.getElementById("bilans-output").innerHTML = "" 
             
             if abs(tot_ob_dt - tot_ob_ct) > 0.01:
-                js.alert("UWAGA! Obroty za okres Dt i Ct nie są sobie równe. Sprawdź poprawność księgowań!")
+                js.alert("UWAGA! Obroty za okres Dt i Ct nie są sobie równe. Sprawdź poprawność wprowadzonych dekretacji i księgowań!")
 
         def generate_balance(e):
             if t_accounts_store and not accounts_closed:
-                js.alert("Masz otwarte konta T-owe! Najpierw zamknij konta żółtym przyciskiem.")
+                js.alert("Masz otwarte konta T-owe! Najpierw zamknij konta żółtym przyciskiem w Sekcji 1.")
                 return
 
             sums = {
@@ -664,11 +804,13 @@
             }
 
             net_profit_from_operations = 0
+            
+            agg_data = get_aggregated_data()
 
             for item in manual_store:
                 if item["cat"] in sums: sums[item["cat"]] += item["amount"]
 
-            for code, data in t_accounts_store.items():
+            for code, data in agg_data.items():
                 acc_info = CHART_OF_ACCOUNTS[code]
                 sum_wn = sum([x['amt'] for x in data['wn']])
                 sum_ma = sum([x['amt'] for x in data['ma']])
