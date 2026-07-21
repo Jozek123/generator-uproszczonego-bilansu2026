@@ -89,7 +89,7 @@
             <h3>1. Księga Główna (Konta T-owe - wizualne)</h3>
             <div class="input-group">
                 <label>Wybierz konto: </label>
-                <input type="text" id="account_search" placeholder="Szukaj (np. Kasa, 130)..." py-input="filter_accounts" style="width: 200px;">
+                <input type="text" id="account_search" placeholder="Szukaj (np. Kasa, 130)..." py-input="filter_accounts" py-keydown="handle_enter_t" style="width: 200px;">
                 <select id="t_account_select" style="min-width: 400px; max-width: 500px;"></select>
                 <button py-click="add_t_account">Utwórz konto T-owe</button>
             </div>
@@ -108,12 +108,12 @@
             </div>
             <div class="input-group">
                 <label style="min-width: 100px;">Wn (Dt): </label>
-                <input type="text" id="j_search_wn" placeholder="Szukaj konta..." py-input="filter_j_wn" style="width: 150px;">
+                <input type="text" id="j_search_wn" placeholder="Szukaj konta... (+ Enter)" py-input="filter_j_wn" py-keydown="handle_enter_wn" style="width: 150px;">
                 <select id="j_acc_wn" style="min-width: 350px;"></select>
             </div>
             <div class="input-group">
                 <label style="min-width: 100px;">Ma (Ct): </label>
-                <input type="text" id="j_search_ma" placeholder="Szukaj konta..." py-input="filter_j_ma" style="width: 150px;">
+                <input type="text" id="j_search_ma" placeholder="Szukaj konta... (+ Enter)" py-input="filter_j_ma" py-keydown="handle_enter_ma" style="width: 150px;">
                 <select id="j_acc_ma" style="min-width: 350px;"></select>
             </div>
             <div class="input-group">
@@ -391,6 +391,37 @@
         def filter_accounts(e): populate_select("t_account_select", js.document.getElementById("account_search").value)
         def filter_j_wn(e): populate_select("j_acc_wn", js.document.getElementById("j_search_wn").value)
         def filter_j_ma(e): populate_select("j_acc_ma", js.document.getElementById("j_search_ma").value)
+
+        # Obsługa klawisza Enter
+        def handle_enter_t(e):
+            if e.key == "Enter":
+                e.preventDefault()
+                sel = js.document.getElementById("t_account_select")
+                for i in range(sel.options.length):
+                    opt = sel.options.item(i)
+                    if opt.value and not opt.disabled:
+                        sel.value = opt.value
+                        break
+
+        def handle_enter_wn(e):
+            if e.key == "Enter":
+                e.preventDefault()
+                sel = js.document.getElementById("j_acc_wn")
+                for i in range(sel.options.length):
+                    opt = sel.options.item(i)
+                    if opt.value and not opt.disabled:
+                        sel.value = opt.value
+                        break
+
+        def handle_enter_ma(e):
+            if e.key == "Enter":
+                e.preventDefault()
+                sel = js.document.getElementById("j_acc_ma")
+                for i in range(sel.options.length):
+                    opt = sel.options.item(i)
+                    if opt.value and not opt.disabled:
+                        sel.value = opt.value
+                        break
 
         populate_select("t_account_select")
         populate_select("j_acc_wn")
