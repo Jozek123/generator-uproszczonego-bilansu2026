@@ -110,52 +110,90 @@
                 <input type="text" id="j_op" placeholder="Nr op. (np. 1)" style="width: 100px; font-weight: bold; background: #e8f8f5;">
                 <span style="font-size: 0.9em; color: #7f8c8d;">W ramach jednego numeru możesz zaksięgować operację złożoną (niewypełnione wiersze zostaną pominięte).</span>
             </div>
-            <div class="input-group" style="background: #fdfdfd; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
-                <div style="display:flex; flex-direction:column; gap:12px; width: 100%;">
+            
+            <div style="background: #fdfdfd; padding: 20px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px;">
+                <div style="display:flex; flex-direction:column; width: 100%;">
+                    
                     <!-- Wiersz 1 -->
-                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                        <strong style="color:#7f8c8d;">Wiersz 1:</strong>
-                        <input type="text" id="j_amt_1" placeholder="Kwota (np. 1500,50)" style="width: 130px;">
-                        <label>Wn (Dt):</label>
-                        <input type="text" id="j_search_wn_1" placeholder="Szukaj Wn..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 100px;">
-                        <select id="j_acc_wn_1" style="min-width: 260px; max-width: 260px;"></select>
-                        <label>Ma (Ct):</label>
-                        <input type="text" id="j_search_ma_1" placeholder="Szukaj Ma..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 100px;">
-                        <select id="j_acc_ma_1" style="min-width: 260px; max-width: 260px;"></select>
+                    <div style="display:flex; gap:20px; align-items:center; border-bottom:1px solid #eaeaea; padding-bottom:12px; margin-bottom:12px;">
+                        <div style="display:flex; flex-direction:column; width:140px; gap:4px;">
+                            <strong style="color:#7f8c8d;">Wiersz 1:</strong>
+                            <input type="text" id="j_amt_1" placeholder="Kwota (np. 1500,50)" style="width:100%;">
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <label style="width:65px; font-weight:bold; text-align:right;">Wn (Dt):</label>
+                                <input type="text" id="j_search_wn_1" placeholder="Szukaj Wn..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 120px;">
+                                <select id="j_acc_wn_1" style="min-width: 320px; max-width: 320px;"></select>
+                            </div>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <label style="width:65px; font-weight:bold; text-align:right;">Ma (Ct):</label>
+                                <input type="text" id="j_search_ma_1" placeholder="Szukaj Ma..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 120px;">
+                                <select id="j_acc_ma_1" style="min-width: 320px; max-width: 320px;"></select>
+                            </div>
+                        </div>
                     </div>
+                    
                     <!-- Wiersz 2 -->
-                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                        <strong style="color:#7f8c8d;">Wiersz 2:</strong>
-                        <input type="text" id="j_amt_2" placeholder="Kwota" style="width: 130px;">
-                        <label>Wn (Dt):</label>
-                        <input type="text" id="j_search_wn_2" placeholder="Szukaj Wn..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 100px;">
-                        <select id="j_acc_wn_2" style="min-width: 260px; max-width: 260px;"></select>
-                        <label>Ma (Ct):</label>
-                        <input type="text" id="j_search_ma_2" placeholder="Szukaj Ma..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 100px;">
-                        <select id="j_acc_ma_2" style="min-width: 260px; max-width: 260px;"></select>
+                    <div style="display:flex; gap:20px; align-items:center; border-bottom:1px solid #eaeaea; padding-bottom:12px; margin-bottom:12px;">
+                        <div style="display:flex; flex-direction:column; width:140px; gap:4px;">
+                            <strong style="color:#7f8c8d;">Wiersz 2:</strong>
+                            <input type="text" id="j_amt_2" placeholder="Kwota" style="width:100%;">
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <label style="width:65px; font-weight:bold; text-align:right;">Wn (Dt):</label>
+                                <input type="text" id="j_search_wn_2" placeholder="Szukaj Wn..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 120px;">
+                                <select id="j_acc_wn_2" style="min-width: 320px; max-width: 320px;"></select>
+                            </div>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <label style="width:65px; font-weight:bold; text-align:right;">Ma (Ct):</label>
+                                <input type="text" id="j_search_ma_2" placeholder="Szukaj Ma..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 120px;">
+                                <select id="j_acc_ma_2" style="min-width: 320px; max-width: 320px;"></select>
+                            </div>
+                        </div>
                     </div>
+                    
                     <!-- Wiersz 3 -->
-                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                        <strong style="color:#7f8c8d;">Wiersz 3:</strong>
-                        <input type="text" id="j_amt_3" placeholder="Kwota" style="width: 130px;">
-                        <label>Wn (Dt):</label>
-                        <input type="text" id="j_search_wn_3" placeholder="Szukaj Wn..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 100px;">
-                        <select id="j_acc_wn_3" style="min-width: 260px; max-width: 260px;"></select>
-                        <label>Ma (Ct):</label>
-                        <input type="text" id="j_search_ma_3" placeholder="Szukaj Ma..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 100px;">
-                        <select id="j_acc_ma_3" style="min-width: 260px; max-width: 260px;"></select>
+                    <div style="display:flex; gap:20px; align-items:center; border-bottom:1px solid #eaeaea; padding-bottom:12px; margin-bottom:12px;">
+                        <div style="display:flex; flex-direction:column; width:140px; gap:4px;">
+                            <strong style="color:#7f8c8d;">Wiersz 3:</strong>
+                            <input type="text" id="j_amt_3" placeholder="Kwota" style="width:100%;">
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <label style="width:65px; font-weight:bold; text-align:right;">Wn (Dt):</label>
+                                <input type="text" id="j_search_wn_3" placeholder="Szukaj Wn..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 120px;">
+                                <select id="j_acc_wn_3" style="min-width: 320px; max-width: 320px;"></select>
+                            </div>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <label style="width:65px; font-weight:bold; text-align:right;">Ma (Ct):</label>
+                                <input type="text" id="j_search_ma_3" placeholder="Szukaj Ma..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 120px;">
+                                <select id="j_acc_ma_3" style="min-width: 320px; max-width: 320px;"></select>
+                            </div>
+                        </div>
                     </div>
+                    
                     <!-- Wiersz 4 -->
-                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                        <strong style="color:#7f8c8d;">Wiersz 4:</strong>
-                        <input type="text" id="j_amt_4" placeholder="Kwota" style="width: 130px;">
-                        <label>Wn (Dt):</label>
-                        <input type="text" id="j_search_wn_4" placeholder="Szukaj Wn..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 100px;">
-                        <select id="j_acc_wn_4" style="min-width: 260px; max-width: 260px;"></select>
-                        <label>Ma (Ct):</label>
-                        <input type="text" id="j_search_ma_4" placeholder="Szukaj Ma..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 100px;">
-                        <select id="j_acc_ma_4" style="min-width: 260px; max-width: 260px;"></select>
+                    <div style="display:flex; gap:20px; align-items:center;">
+                        <div style="display:flex; flex-direction:column; width:140px; gap:4px;">
+                            <strong style="color:#7f8c8d;">Wiersz 4:</strong>
+                            <input type="text" id="j_amt_4" placeholder="Kwota" style="width:100%;">
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <label style="width:65px; font-weight:bold; text-align:right;">Wn (Dt):</label>
+                                <input type="text" id="j_search_wn_4" placeholder="Szukaj Wn..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 120px;">
+                                <select id="j_acc_wn_4" style="min-width: 320px; max-width: 320px;"></select>
+                            </div>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <label style="width:65px; font-weight:bold; text-align:right;">Ma (Ct):</label>
+                                <input type="text" id="j_search_ma_4" placeholder="Szukaj Ma..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 120px;">
+                                <select id="j_acc_ma_4" style="min-width: 320px; max-width: 320px;"></select>
+                            </div>
+                        </div>
                     </div>
+                    
                 </div>
             </div>
             
