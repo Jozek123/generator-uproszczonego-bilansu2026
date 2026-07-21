@@ -107,21 +107,60 @@
         <div class="section">
             <h3>2. Dekretacja operacji gospodarczych (Dziennik)</h3>
             <div class="input-group">
-                <input type="text" id="j_op" placeholder="Nr op. (np. 1a)" style="width: 100px;">
-                <input type="text" id="j_amt" placeholder="Kwota (np. 1500,50)" style="width: 150px;">
+                <input type="text" id="j_op" placeholder="Nr op. (np. 1)" style="width: 100px; font-weight: bold; background: #e8f8f5;">
+                <span style="font-size: 0.9em; color: #7f8c8d;">W ramach jednego numeru możesz zaksięgować operację złożoną (niewypełnione wiersze zostaną pominięte).</span>
             </div>
-            <div class="input-group">
-                <label style="min-width: 100px;">Wn (Dt): </label>
-                <input type="text" id="j_search_wn" placeholder="Szukaj konta... (+ Enter)" py-input="filter_j_wn" py-keydown="handle_enter_wn" style="width: 150px;">
-                <select id="j_acc_wn" style="min-width: 350px;"></select>
+            <div class="input-group" style="background: #fdfdfd; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
+                <div style="display:flex; flex-direction:column; gap:12px; width: 100%;">
+                    <!-- Wiersz 1 -->
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <strong style="color:#7f8c8d;">Wiersz 1:</strong>
+                        <input type="text" id="j_amt_1" placeholder="Kwota (np. 1500,50)" style="width: 130px;">
+                        <label>Wn (Dt):</label>
+                        <input type="text" id="j_search_wn_1" placeholder="Szukaj Wn..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 100px;">
+                        <select id="j_acc_wn_1" style="min-width: 260px; max-width: 260px;"></select>
+                        <label>Ma (Ct):</label>
+                        <input type="text" id="j_search_ma_1" placeholder="Szukaj Ma..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 100px;">
+                        <select id="j_acc_ma_1" style="min-width: 260px; max-width: 260px;"></select>
+                    </div>
+                    <!-- Wiersz 2 -->
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <strong style="color:#7f8c8d;">Wiersz 2:</strong>
+                        <input type="text" id="j_amt_2" placeholder="Kwota" style="width: 130px;">
+                        <label>Wn (Dt):</label>
+                        <input type="text" id="j_search_wn_2" placeholder="Szukaj Wn..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 100px;">
+                        <select id="j_acc_wn_2" style="min-width: 260px; max-width: 260px;"></select>
+                        <label>Ma (Ct):</label>
+                        <input type="text" id="j_search_ma_2" placeholder="Szukaj Ma..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 100px;">
+                        <select id="j_acc_ma_2" style="min-width: 260px; max-width: 260px;"></select>
+                    </div>
+                    <!-- Wiersz 3 -->
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <strong style="color:#7f8c8d;">Wiersz 3:</strong>
+                        <input type="text" id="j_amt_3" placeholder="Kwota" style="width: 130px;">
+                        <label>Wn (Dt):</label>
+                        <input type="text" id="j_search_wn_3" placeholder="Szukaj Wn..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 100px;">
+                        <select id="j_acc_wn_3" style="min-width: 260px; max-width: 260px;"></select>
+                        <label>Ma (Ct):</label>
+                        <input type="text" id="j_search_ma_3" placeholder="Szukaj Ma..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 100px;">
+                        <select id="j_acc_ma_3" style="min-width: 260px; max-width: 260px;"></select>
+                    </div>
+                    <!-- Wiersz 4 -->
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <strong style="color:#7f8c8d;">Wiersz 4:</strong>
+                        <input type="text" id="j_amt_4" placeholder="Kwota" style="width: 130px;">
+                        <label>Wn (Dt):</label>
+                        <input type="text" id="j_search_wn_4" placeholder="Szukaj Wn..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 100px;">
+                        <select id="j_acc_wn_4" style="min-width: 260px; max-width: 260px;"></select>
+                        <label>Ma (Ct):</label>
+                        <input type="text" id="j_search_ma_4" placeholder="Szukaj Ma..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 100px;">
+                        <select id="j_acc_ma_4" style="min-width: 260px; max-width: 260px;"></select>
+                    </div>
+                </div>
             </div>
+            
             <div class="input-group">
-                <label style="min-width: 100px;">Ma (Ct): </label>
-                <input type="text" id="j_search_ma" placeholder="Szukaj konta... (+ Enter)" py-input="filter_j_ma" py-keydown="handle_enter_ma" style="width: 150px;">
-                <select id="j_acc_ma" style="min-width: 350px;"></select>
-            </div>
-            <div class="input-group">
-                <button py-click="add_journal" style="background-color: #8e44ad; width: 250px;">Dodaj zapis (Dekretuj)</button>
+                <button py-click="add_journal" style="background-color: #8e44ad; width: 100%; font-size: 1.1em; padding: 12px; margin-top: 5px;">Dodaj zapis (Dekretuj podanym numerem)</button>
             </div>
             
             <table class="generic-table" style="margin-top: 15px;">
@@ -371,7 +410,7 @@
                     parent_code = code.split("-")[0]
                     has_subaccounts.add(parent_code)
                     
-            if select_id in ["j_acc_wn", "j_acc_ma"]:
+            if select_id.startswith("j_acc"):
                 html += "<option value=''>-- Brak / Nie dotyczy --</option>"
             
             for code, data in CHART_OF_ACCOUNTS.items():
@@ -392,9 +431,12 @@
             if current_group != "": html += "</optgroup>"
             sel.innerHTML = html
 
-        def filter_accounts(e): populate_select("t_account_select", js.document.getElementById("account_search").value)
-        def filter_j_wn(e): populate_select("j_acc_wn", js.document.getElementById("j_search_wn").value)
-        def filter_j_ma(e): populate_select("j_acc_ma", js.document.getElementById("j_search_ma").value)
+        def filter_accounts(e): 
+            populate_select("t_account_select", js.document.getElementById("account_search").value)
+            
+        def filter_j(e):
+            select_id = e.target.id.replace("search", "acc")
+            populate_select(select_id, e.target.value)
 
         # Obsługa klawisza Enter
         def handle_enter_t(e):
@@ -407,29 +449,22 @@
                         sel.value = opt.value
                         break
 
-        def handle_enter_wn(e):
+        def handle_enter_j(e):
             if e.key == "Enter":
                 e.preventDefault()
-                sel = js.document.getElementById("j_acc_wn")
+                select_id = e.target.id.replace("search", "acc")
+                sel = js.document.getElementById(select_id)
                 for i in range(sel.options.length):
                     opt = sel.options.item(i)
                     if opt.value and not opt.disabled:
                         sel.value = opt.value
                         break
 
-        def handle_enter_ma(e):
-            if e.key == "Enter":
-                e.preventDefault()
-                sel = js.document.getElementById("j_acc_ma")
-                for i in range(sel.options.length):
-                    opt = sel.options.item(i)
-                    if opt.value and not opt.disabled:
-                        sel.value = opt.value
-                        break
-
+        # Inicjalizacja selectów
         populate_select("t_account_select")
-        populate_select("j_acc_wn")
-        populate_select("j_acc_ma")
+        for i in range(1, 5):
+            populate_select(f"j_acc_wn_{i}")
+            populate_select(f"j_acc_ma_{i}")
 
         def fmt_pln(val):
             if val == 0: return "0"
@@ -441,8 +476,20 @@
             val_str = str(val_str).replace(" ", "").replace(",", ".")
             return float(val_str)
 
-        def natural_sort_key(s):
-            return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', str(s))]
+        # Inteligentne sortowanie uwzględniające Sp na samym początku
+        def complex_sort_key(s):
+            s_str = str(s).strip().lower()
+            if s_str in ['sp', 'bo']:
+                return (0, [])
+            parts = []
+            for text in re.split('([0-9]+)', str(s)):
+                if text.isdigit(): parts.append(int(text))
+                elif text: parts.append(text.lower())
+            return (1, parts)
+
+        # Sprawdzenie czy konto jest wynikowe (4,5,7,870)
+        def is_wynikowe(code):
+            return code.startswith('4') or code.startswith('5') or code.startswith('7') or code == '870'
 
         # ZMIENNE STANU
         manual_store = []
@@ -453,7 +500,7 @@
         # --- GENEROWANIE DANYCH DO WIDOKÓW (SPINA T-KONTA Z DZIENNIKIEM) ---
         def get_aggregated_data_for_view():
             agg = {}
-            # 1. Rejestr ręcznych operacji z kont T-owych (t_accounts_store)
+            # 1. Ręczne operacje z kont T-owych
             for code, data in t_accounts_store.items():
                 if code not in agg: agg[code] = {"wn": [], "ma": []}
                 for i, op in enumerate(data["wn"]):
@@ -461,7 +508,7 @@
                 for i, op in enumerate(data["ma"]):
                     agg[code]["ma"].append({"op": op["op"], "amt": op["amt"], "type": "t", "idx": i})
                 
-            # 2. Rejestr operacji z Dziennika
+            # 2. Operacje z Dziennika
             for i, item in enumerate(journal_store):
                 if item["wn_code"]:
                     if item["wn_code"] not in agg: agg[item["wn_code"]] = {"wn": [], "ma": []}
@@ -469,6 +516,12 @@
                 if item["ma_code"]:
                     if item["ma_code"] not in agg: agg[item["ma_code"]] = {"wn": [], "ma": []}
                     agg[item["ma_code"]]["ma"].append({"op": item["no"], "amt": item["amount"], "type": "j", "idx": i})
+            
+            # 3. Sortowanie by Sp wylądowało na górze
+            for code in agg:
+                agg[code]["wn"].sort(key=lambda x: complex_sort_key(x["op"]))
+                agg[code]["ma"].sort(key=lambda x: complex_sort_key(x["op"]))
+                
             return agg
 
         def force_sync_t_accounts(e):
@@ -477,46 +530,55 @@
         # --- LOGIKA DEKRETACJI (DZIENNIK) ---
         def add_journal(e):
             op_no = js.document.getElementById("j_op").value.strip()
-            amt_str = js.document.getElementById("j_amt").value
-            wn_code = js.document.getElementById("j_acc_wn").value
-            ma_code = js.document.getElementById("j_acc_ma").value
+            if not op_no:
+                js.alert("Podaj numer operacji!")
+                return
             
-            if not amt_str: return
-            try:
-                amt = parse_pln(amt_str)
-                if not wn_code and not ma_code:
-                    js.alert("Zaznacz konto po stronie Wn lub Ma!")
-                    return
-                    
-                journal_store.append({
-                    "no": op_no,
-                    "amount": amt,
-                    "wn_code": wn_code,
-                    "ma_code": ma_code
-                })
+            added_any = False
+            for i in range(1, 5):
+                amt_str = js.document.getElementById(f"j_amt_{i}").value
+                wn_code = js.document.getElementById(f"j_acc_wn_{i}").value
+                ma_code = js.document.getElementById(f"j_acc_ma_{i}").value
                 
-                journal_store.sort(key=lambda x: natural_sort_key(x['no']))
+                if not amt_str: continue
+                
+                try:
+                    amt = parse_pln(amt_str)
+                    if not wn_code and not ma_code:
+                        js.alert(f"W wierszu {i} zaznacz konto po stronie Wn lub Ma!")
+                        return
+                        
+                    journal_store.append({
+                        "no": op_no,
+                        "amount": amt,
+                        "wn_code": wn_code,
+                        "ma_code": ma_code
+                    })
+                    added_any = True
+                except:
+                    js.alert(f"Niepoprawny format kwoty w wierszu {i}!")
+                    return
+            
+            if added_any:
+                journal_store.sort(key=lambda x: complex_sort_key(x['no']))
                 render_journal()
                 
-                # Zabezpieczenie przed edycją przy zamkniętych kontach - otwieramy je dla podglądu zmian
                 global accounts_closed
                 if accounts_closed:
                     accounts_closed = False
                     update_toggle_btn()
                 
-                # Automatycznie aktualizuje Konta T-owe
                 render_t_accounts()
                 
                 js.document.getElementById("j_op").value = ""
-                js.document.getElementById("j_amt").value = ""
-                js.document.getElementById("j_acc_wn").selectedIndex = 0
-                js.document.getElementById("j_acc_ma").selectedIndex = 0
-                js.document.getElementById("j_search_wn").value = ""
-                js.document.getElementById("j_search_ma").value = ""
-                populate_select("j_acc_wn")
-                populate_select("j_acc_ma")
-            except:
-                js.alert("Niepoprawny format kwoty!")
+                for i in range(1, 5):
+                    js.document.getElementById(f"j_amt_{i}").value = ""
+                    js.document.getElementById(f"j_acc_wn_{i}").selectedIndex = 0
+                    js.document.getElementById(f"j_acc_ma_{i}").selectedIndex = 0
+                    js.document.getElementById(f"j_search_wn_{i}").value = ""
+                    js.document.getElementById(f"j_search_ma_{i}").value = ""
+                    populate_select(f"j_acc_wn_{i}")
+                    populate_select(f"j_acc_ma_{i}")
 
         def render_journal():
             tbody = js.document.getElementById("journal-tbody")
@@ -527,7 +589,7 @@
                 
                 html += f"""
                 <tr>
-                    <td style="text-align:center;">{item['no']}</td>
+                    <td style="text-align:center; font-weight:bold;">{item['no']}</td>
                     <td class='val'>{fmt_pln(item['amount'])}</td>
                     <td>{wn_display}</td>
                     <td>{ma_display}</td>
@@ -542,9 +604,18 @@
         def edit_journal(index):
             item = journal_store[index]
             js.document.getElementById("j_op").value = item['no']
-            js.document.getElementById("j_amt").value = fmt_pln(item['amount'])
-            js.document.getElementById("j_acc_wn").value = item['wn_code']
-            js.document.getElementById("j_acc_ma").value = item['ma_code']
+            js.document.getElementById("j_amt_1").value = fmt_pln(item['amount'])
+            js.document.getElementById("j_acc_wn_1").value = item['wn_code']
+            js.document.getElementById("j_acc_ma_1").value = item['ma_code']
+            
+            # Wyczyść wiersze 2, 3, 4
+            for i in range(2, 5):
+                js.document.getElementById(f"j_amt_{i}").value = ""
+                js.document.getElementById(f"j_acc_wn_{i}").selectedIndex = 0
+                js.document.getElementById(f"j_acc_ma_{i}").selectedIndex = 0
+                js.document.getElementById(f"j_search_wn_{i}").value = ""
+                js.document.getElementById(f"j_search_ma_{i}").value = ""
+                
             journal_store.pop(index)
             render_journal()
             
@@ -555,7 +626,7 @@
             render_t_accounts()
             
         def del_journal(index):
-            if js.confirm("Czy usunąć ten dekret? (Zmiana odzwierciedli się też na kontach T-owych)"):
+            if js.confirm("Czy usunąć ten wiersz dekretu? (Zmiana odzwierciedli się na kontach T-owych)"):
                 journal_store.pop(index)
                 render_journal()
                 
@@ -593,7 +664,6 @@
             try:
                 amt = parse_pln(amt_input)
                 op = op_input if op_input else "Sp"
-                # Jeśli wprowadzamy z palca na nowym koncie wygenerowanym z Dziennika:
                 if code not in t_accounts_store:
                     t_accounts_store[code] = {"wn": [], "ma": []}
                     
@@ -642,8 +712,10 @@
 
         def render_t_accounts():
             container = js.document.getElementById("t-accounts-container")
-            html = ""
             agg_data = get_aggregated_data_for_view()
+            
+            html_bilansowe = ""
+            html_wynikowe = ""
             
             for code in sorted(agg_data.keys()):
                 data = agg_data[code]
@@ -653,7 +725,7 @@
                     if x.get('type') == 't':
                         actions = f"<span class='op-actions'><button class='op-btn' onclick=\"window.edit_op_py('{code}', 'wn', {x['idx']})\">✎</button><button class='op-btn' onclick=\"window.del_op_py('{code}', 'wn', {x['idx']})\">❌</button></span>"
                     else:
-                        actions = f"<span class='op-actions dz-badge' title='Operacja zaksięgowana w Dzienniku. Edytuj ją na liście operacji poniżej.'>[Dz]</span>"
+                        actions = f"<span class='op-actions dz-badge' title='Operacja z Dziennika. Zmień w tabeli niżej.'>[Dz]</span>"
                     wn_html += f"<div class='t-row'><span>{x['op']})</span> <span>{fmt_pln(x['amt'])} {actions}</span></div>"
                 
                 ma_html = ""
@@ -661,7 +733,7 @@
                     if x.get('type') == 't':
                         actions = f"<span class='op-actions'><button class='op-btn' onclick=\"window.del_op_py('{code}', 'ma', {x['idx']})\">❌</button><button class='op-btn' onclick=\"window.edit_op_py('{code}', 'ma', {x['idx']})\">✎</button></span>"
                     else:
-                        actions = f"<span class='op-actions dz-badge' title='Operacja zaksięgowana w Dzienniku. Edytuj ją na liście operacji poniżej.'>[Dz]</span>"
+                        actions = f"<span class='op-actions dz-badge' title='Operacja z Dziennika. Zmień w tabeli niżej.'>[Dz]</span>"
                     ma_html += f"<div class='t-row'><span>{actions} {fmt_pln(x['amt'])}</span> <span>({x['op']}</span></div>"
                 
                 sum_wn = round(sum([x['amt'] for x in data['wn']]), 2)
@@ -726,8 +798,22 @@
                     {footer_html}
                 </div>
                 """
-                html += acc_html
-            container.innerHTML = html
+                
+                if is_wynikowe(code):
+                    html_wynikowe += acc_html
+                else:
+                    html_bilansowe += acc_html
+
+            final_html = ""
+            if html_bilansowe:
+                final_html += f"<div style='width:100%; margin-bottom: 10px;'><h3 style='text-align:center; color:#2980b9; border-bottom: 2px solid #bdc3c7; padding-bottom:5px;'>Konta bilansowe</h3></div>"
+                final_html += html_bilansowe
+            
+            if html_wynikowe:
+                final_html += f"<div style='width:100%; margin-top: 30px; margin-bottom: 10px;'><h3 style='text-align:center; color:#e67e22; border-bottom: 2px solid #bdc3c7; padding-bottom:5px;'>Konta wynikowe</h3></div>"
+                final_html += html_wynikowe
+
+            container.innerHTML = final_html
 
         def toggle_t_accounts(e):
             global accounts_closed
@@ -785,7 +871,7 @@
             try:
                 amt = parse_pln(amt_str)
                 manual_store.append({"no": item_no, "cat": cat, "amount": amt})
-                manual_store.sort(key=lambda x: natural_sort_key(x.get('no', '')))
+                manual_store.sort(key=lambda x: complex_sort_key(x.get('no', '')))
                 render_manual_list()
                 js.document.getElementById("item_number").value = ""
                 js.document.getElementById("amount").value = ""
