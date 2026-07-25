@@ -514,11 +514,13 @@
             val_str = str(val_str).replace(" ", "").replace(",", ".")
             return float(val_str)
 
-        # Inteligentne sortowanie uwzględniające Sp na samym początku
+        # Inteligentne sortowanie uwzględniające Sp na samym początku oraz storno na końcu
         def complex_sort_key(s):
             s_str = str(s).strip().lower()
             if s_str in ['sp', 'bo']:
                 return (0, [])
+            if s_str.startswith('storno'):
+                return (2, [])
             parts = []
             for text in re.split('([0-9]+)', str(s)):
                 if text.isdigit(): parts.append(int(text))
@@ -555,7 +557,7 @@
                     if item["ma_code"] not in agg: agg[item["ma_code"]] = {"wn": [], "ma": []}
                     agg[item["ma_code"]]["ma"].append({"op": item["no"], "amt": item["amount"], "type": "j", "idx": i})
             
-            # 3. Sortowanie by Sp wylądowało na górze
+            # 3. Sortowanie by Sp wylądowało na górze, a storno na dole
             for code in agg:
                 agg[code]["wn"].sort(key=lambda x: complex_sort_key(x["op"]))
                 agg[code]["ma"].sort(key=lambda x: complex_sort_key(x["op"]))
