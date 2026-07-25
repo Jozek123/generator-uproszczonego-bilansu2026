@@ -572,9 +572,6 @@
                 js.alert("Podaj numer operacji!")
                 return
             
-            # Sprawdzenie czy użytkownik wpisał słowo wskazujące na storno
-            is_storno = op_no.lower() in ["storno", "storno czerwone"]
-            
             added_any = False
             for i in range(1, 5):
                 amt_str = js.document.getElementById(f"j_amt_{i}").value
@@ -585,12 +582,6 @@
                 
                 try:
                     amt = parse_pln(amt_str)
-                    
-                    # WERYFIKACJA KWOT UJEMNYCH
-                    if amt < 0 and not is_storno:
-                        js.alert(f"W wierszu {i} wpisano kwotę ujemną. Księgowanie kwot ujemnych jest dozwolone wyłącznie w ramach storna czerwonego! Wpisz 'storno' lub 'storno czerwone' jako numer operacji.")
-                        return
-
                     if not wn_code and not ma_code:
                         js.alert(f"W wierszu {i} zaznacz konto po stronie Wn lub Ma!")
                         return
@@ -711,13 +702,6 @@
             try:
                 amt = parse_pln(amt_input)
                 op = op_input if op_input else "Sp"
-                
-                # WERYFIKACJA KWOT UJEMNYCH
-                is_storno = op.strip().lower() in ["storno", "storno czerwone"]
-                if amt < 0 and not is_storno:
-                    js.alert("Księgowanie kwot ujemnych jest dozwolone wyłącznie w ramach storna czerwonego! Wpisz 'storno' lub 'storno czerwone' jako numer operacji.")
-                    return
-
                 if code not in t_accounts_store:
                     t_accounts_store[code] = {"wn": [], "ma": []}
                     
@@ -735,13 +719,6 @@
             
             try:
                 amt = parse_pln(new_amt_str)
-                
-                # WERYFIKACJA KWOT UJEMNYCH
-                is_storno = new_op_str.strip().lower() in ["storno", "storno czerwone"]
-                if amt < 0 and not is_storno:
-                    js.alert("Księgowanie kwot ujemnych jest dozwolone wyłącznie w ramach storna czerwonego! Zmień numer operacji na 'storno' lub 'storno czerwone'.")
-                    return
-
                 t_accounts_store[code][side][idx] = {"op": new_op_str, "amt": amt}
                 global accounts_closed
                 accounts_closed = False
