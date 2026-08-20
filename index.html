@@ -45,6 +45,12 @@
         
         .t-input-row { display: flex; flex-direction: column; gap: 5px; margin-top: auto; padding-top: 10px; border-top: 1px dashed #ccc;}
         .t-input-row input { width: 100%; box-sizing: border-box; padding: 4px; font-size: 0.85em; }
+
+        /* Style dla zamykania kont T-owych */
+        .close-btn { background-color: #95a5a6; color: white; border: none; padding: 4px; border-radius: 3px; cursor: pointer; width: 100%; transition: 0.2s;}
+        .close-btn:hover { background-color: #7f8c8d; }
+        .closing-input { width: 100%; box-sizing: border-box; font-size: 0.85em; text-align: center; padding: 2px; border: 1px dashed #ccc; background: #f9f9f9;}
+        .sum-input { font-weight: bold; }
         
         /* Tabele Ogólne (Dziennik) */
         .generic-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9em; background: #fff; }
@@ -73,7 +79,14 @@
             #section-t-accounts { border: none; padding: 0; margin: 0; background: transparent; }
             #section-t-accounts h3 { display: none !important; }
             .t-input-row, .op-actions, .dz-badge { display: none !important; }
+            .close-btn { display: none !important; }
             
+            /* Dopasowanie notatnika na wydruku */
+            #notepad { border: 1px solid #ccc !important; }
+            
+            /* Dopasowanie inputów zamykania na wydruku */
+            .closing-input { border: none !important; background: transparent !important; padding: 0 !important;}
+
             /* Formatowanie i skalowanie kont T-owych */
             #t-accounts-container { 
                 display: flex !important; 
@@ -83,7 +96,7 @@
                 align-content: flex-start !important;
             }
             .t-account { 
-                flex: 1 1 calc(33.33% - 12px); /* Przeskalowywanie: 3 w rzędzie lub elastycznie */
+                flex: 1 1 calc(33.33% - 12px); 
                 min-width: 28%;
                 max-width: 48%;
                 border: none !important; 
@@ -100,7 +113,7 @@
                 padding: 3px 0;
             }
             .t-body { 
-                min-height: 80px; /* Przestrzeń do dorysowania wpisów długopisem */
+                min-height: 80px; 
             }
             .t-wn { border-right: 2px solid black; } 
             .t-row { font-size: 0.85em; margin-bottom: 2px; }
@@ -110,6 +123,12 @@
 <body>
     <div class="container">
         <h2 style="text-align: center;">Księgowanie - Dziennik i Księga Główna</h2>
+
+        <!-- SEKCJA 0: NOTATNIK -->
+        <div class="section" id="notepad-section">
+            <h3>Notatnik</h3>
+            <textarea id="notepad" style="width: 100%; height: 120px; padding: 10px; font-family: inherit; border: 1px solid #ccc; border-radius: 4px; resize: vertical; box-sizing: border-box;" placeholder="Miejsce na Twoje notatki (np. obliczenia, odpowiedzi do zadań, zestawienia majątku)..."></textarea>
+        </div>
 
         <!-- SEKCJA 1: KONTA T-OWE -->
         <div class="section" id="section-t-accounts">
@@ -479,11 +498,33 @@
         t_accounts_store = {}
         journal_store = []
 
-        # --- GENEROWANIE DANYCH DO WIDOKÓW (SPINA T-KONTA Z DZIENNIKIEM) ---
+        # --- LOGIKA ZAMYKANIA KONT ---
+        def toggle_close(code):
+            if code not in t_accounts_store:
+                t_accounts_store[code] = {"wn": [], "ma": [], "closed": False, "closing_data": {"ow":"", "om":"", "sw":"", "sm":"", "cw":"", "cm":""}}
+            t_accounts_store[code]["closed"] = not t_accounts_store[code].get("closed", False)
+            render_t_accounts()
+
+        def update_closing(code, field, value):
+            if code not in t_accounts_store:
+                t_accounts_store[code] = {"wn": [], "ma": [], "closed": True, "closing_data": {"ow":"", "om":"", "sw":"", "sm":"", "cw":"", "cm":""}}
+            if "closing_data" not in t_accounts_store[code]:
+                t_accounts_store[code]["closing_data"] = {"ow":"", "om":"", "sw":"", "sm":"", "cw":"", "cm":""}
+            t_accounts_store[code]["closing_data"][field] = value
+
+        js.window.toggle_close_py = toggle_close
+        js.window.update_closing_py = update_closing
+
+        # --- GENEROWANIE DANYCH DO WIDOKÓW ---
         def get_aggregated_data_for_view():
             agg = {}
             for code, data in t_accounts_store.items():
-                if code not in agg: agg[code] = {"wn": [], "ma": []}
+                if code not in agg: 
+                    agg[code] = {
+                        "wn": [], "ma": [], 
+                        "closed": data.get("closed", False), 
+                        "closing_data": data.get("closing_data", {"ow":"", "om":"", "sw":"", "sm":"", "cw":"", "cm":""})
+                    }
                 for i, op in enumerate(data["wn"]):
                     agg[code]["wn"].append({"op": op["op"], "amt": op["amt"], "type": "t", "idx": i})
                 for i, op in enumerate(data["ma"]):
@@ -491,10 +532,12 @@
                 
             for i, item in enumerate(journal_store):
                 if item["wn_code"]:
-                    if item["wn_code"] not in agg: agg[item["wn_code"]] = {"wn": [], "ma": []}
+                    if item["wn_code"] not in agg: 
+                        agg[item["wn_code"]] = {"wn": [], "ma": [], "closed": False, "closing_data": {"ow":"", "om":"", "sw":"", "sm":"", "cw":"", "cm":""}}
                     agg[item["wn_code"]]["wn"].append({"op": item["no"], "amt": item["amount"], "type": "j", "idx": i})
                 if item["ma_code"]:
-                    if item["ma_code"] not in agg: agg[item["ma_code"]] = {"wn": [], "ma": []}
+                    if item["ma_code"] not in agg: 
+                        agg[item["ma_code"]] = {"wn": [], "ma": [], "closed": False, "closing_data": {"ow":"", "om":"", "sw":"", "sm":"", "cw":"", "cm":""}}
                     agg[item["ma_code"]]["ma"].append({"op": item["no"], "amt": item["amount"], "type": "j", "idx": i})
             
             for code in agg:
@@ -608,7 +651,7 @@
             code = select_elem.value
             if not code: return
             if code not in t_accounts_store:
-                t_accounts_store[code] = {"wn": [], "ma": []}
+                t_accounts_store[code] = {"wn": [], "ma": [], "closed": False, "closing_data": {"ow":"", "om":"", "sw":"", "sm":"", "cw":"", "cm":""}}
                 render_t_accounts()
             else:
                 js.alert("To konto jest już otwarte na planszy!")
@@ -621,7 +664,7 @@
                 amt = parse_pln(amt_input)
                 op = op_input if op_input else "Sp"
                 if code not in t_accounts_store:
-                    t_accounts_store[code] = {"wn": [], "ma": []}
+                    t_accounts_store[code] = {"wn": [], "ma": [], "closed": False, "closing_data": {"ow":"", "om":"", "sw":"", "sm":"", "cw":"", "cm":""}}
                     
                 t_accounts_store[code][side].append({"op": op, "amt": amt})
                 render_t_accounts()
@@ -677,8 +720,34 @@
                         actions = f"<span class='op-actions dz-badge' title='Operacja z Dziennika. Zmień w tabeli niżej.'>[Dz]</span>"
                     ma_html += f"<div class='t-row'><span>{actions} {fmt_pln(x['amt'])}</span> <span>({x['op']}</span></div>"
                 
+                closing_btn_text = "Odznacz zamknięcie" if data['closed'] else "Zamknij konto (podkreśl)"
+                closing_html = ""
+                
+                if data['closed']:
+                    c_data = data['closing_data']
+                    closing_html = f"""
+                    <div class="t-closing-section">
+                        <div style="border-top: 2px solid black; width: 100%;"></div>
+                        <div class="t-body" style="min-height: auto;">
+                            <div class="t-side t-wn"><input type="text" class="closing-input" placeholder="Obroty Wn" value="{c_data['ow']}" onchange="window.update_closing_py('{code}', 'ow', this.value)"></div>
+                            <div class="t-side"><input type="text" class="closing-input" placeholder="Obroty Ma" value="{c_data['om']}" onchange="window.update_closing_py('{code}', 'om', this.value)"></div>
+                        </div>
+                        <div class="t-body" style="min-height: auto;">
+                            <div class="t-side t-wn"><input type="text" class="closing-input" placeholder="Saldo Wn" value="{c_data['sw']}" onchange="window.update_closing_py('{code}', 'sw', this.value)"></div>
+                            <div class="t-side"><input type="text" class="closing-input" placeholder="Saldo Ma" value="{c_data['sm']}" onchange="window.update_closing_py('{code}', 'sm', this.value)"></div>
+                        </div>
+                        <div style="border-top: 2px solid black; width: 100%;"></div>
+                        <div class="t-body" style="min-height: auto; border-bottom: 4px double black;">
+                            <div class="t-side t-wn"><input type="text" class="closing-input sum-input" placeholder="Suma k. Wn" value="{c_data['cw']}" onchange="window.update_closing_py('{code}', 'cw', this.value)"></div>
+                            <div class="t-side"><input type="text" class="closing-input sum-input" placeholder="Suma k. Ma" value="{c_data['cm']}" onchange="window.update_closing_py('{code}', 'cm', this.value)"></div>
+                        </div>
+                    </div>
+                    """
+
                 footer_html = f"""
+                {closing_html}
                 <div class="t-input-row">
+                    <button class="close-btn" onclick="window.toggle_close_py('{code}')" style="margin-bottom: 5px;">{closing_btn_text}</button>
                     <div style="display:flex; justify-content: space-between; gap:5px;">
                         <div style="width:50%; display:flex; flex-direction:column; gap:2px;">
                             <input type="text" id="op_wn_{code}" placeholder="Nr (np. Sp)">
