@@ -59,6 +59,18 @@
         
         .val { text-align: right; }
 
+        /* Formularze Sprawozdawcze (Bilans, RZiS) */
+        .report-table { width: 100%; border-collapse: collapse; background: #fff; font-size: 0.85em; }
+        .report-table th, .report-table td { border: 1px solid #bdc3c7; padding: 6px 8px; vertical-align: middle; }
+        .report-table th { background: #ecf0f1; text-align: center; font-weight: bold; }
+        .report-table input { width: 100%; box-sizing: border-box; border: 1px solid #eaeaea; padding: 5px; background-color: #fbfbfc; min-width: 80px; }
+        .report-table input:focus { outline: 1px solid #3498db; background-color: #fff; }
+        .indent-1 { padding-left: 20px !important; }
+        .indent-2 { padding-left: 40px !important; }
+        .indent-3 { padding-left: 60px !important; }
+        .bold-row { font-weight: bold; background: #f9f9f9; }
+        .center-col { text-align: center; }
+
         /* Dedykowany styl wydruku */
         @page {
             size: A4 portrait;
@@ -74,15 +86,16 @@
             }
             .container { box-shadow: none; padding: 0; margin: 0; border: none; max-width: 100%; width: 100%; }
             
-            /* Ukrywanie zbędnych elementów UI */
-            h2, h3, .input-group, .sync-btn, .print-btn, #journal-section { display: none !important; }
+            /* Ukrywanie zbędnych elementów UI na wydruku (zgodnie z prośbą) */
+            h2, h3, .input-group, .sync-btn, .print-btn, 
+            #notepad-section, #journal-section, #bilans-section, #rzis-kalk-section, #rzis-por-section { 
+                display: none !important; 
+            }
+            
             #section-t-accounts { border: none; padding: 0; margin: 0; background: transparent; }
             #section-t-accounts h3 { display: none !important; }
             .t-input-row, .op-actions, .dz-badge { display: none !important; }
             .close-btn { display: none !important; }
-            
-            /* Dopasowanie notatnika na wydruku */
-            #notepad { border: 1px solid #ccc !important; }
             
             /* Dopasowanie inputów zamykania na wydruku */
             .closing-input { border: none !important; background: transparent !important; padding: 0 !important;}
@@ -143,12 +156,12 @@
             <div id="t-accounts-container"></div>
             
             <button class="sync-btn" py-click="force_sync_t_accounts">🔄 AKTUALIZUJ KONTA T-OWE (Pobierz dekrety z Dziennika)</button>
-            <button class="print-btn" onclick="window.print()">🖨️ WYDRUKUJ OTWARTE KONTA T-OWE (do uzupełnienia długopisem)</button>
+            <button class="print-btn" onclick="window.print()">🖨️ WYDRUKUJ OTWARTE KONTA T-OWE (tylko konta, bez notatnika)</button>
         </div>
 
         <!-- SEKCJA 2: DEKRETACJA OPERACJI GOSPODARCZYCH -->
         <div class="section" id="journal-section">
-            <h3>2. Dekretacja operacji gospodarchych (Dziennik)</h3>
+            <h3>2. Dekretacja operacji gospodarczych (Dziennik)</h3>
             <div class="input-group">
                 <input type="text" id="j_op" placeholder="Nr op. (np. 1)" style="width: 100px; font-weight: bold; background: #e8f8f5;">
                 <span style="font-size: 0.9em; color: #7f8c8d;">W ramach jednego numeru możesz zaksięgować operację złożoną (niewypełnione wiersze zostaną pominięte).</span>
@@ -156,8 +169,7 @@
             
             <div style="background: #fdfdfd; padding: 20px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px;">
                 <div style="display:flex; flex-direction:column; width: 100%;">
-                    
-                    <!-- Wiersze dekretacji (1-4) -->
+                    <!-- Wiersz 1 -->
                     <div style="display:flex; gap:20px; align-items:center; border-bottom:1px solid #eaeaea; padding-bottom:12px; margin-bottom:12px;">
                         <div style="display:flex; flex-direction:column; width:140px; gap:4px;">
                             <strong style="color:#7f8c8d;">Wiersz 1:</strong>
@@ -176,7 +188,7 @@
                             </div>
                         </div>
                     </div>
-                    
+                    <!-- Wiersz 2 -->
                     <div style="display:flex; gap:20px; align-items:center; border-bottom:1px solid #eaeaea; padding-bottom:12px; margin-bottom:12px;">
                         <div style="display:flex; flex-direction:column; width:140px; gap:4px;">
                             <strong style="color:#7f8c8d;">Wiersz 2:</strong>
@@ -195,7 +207,7 @@
                             </div>
                         </div>
                     </div>
-                    
+                    <!-- Wiersz 3 -->
                     <div style="display:flex; gap:20px; align-items:center; border-bottom:1px solid #eaeaea; padding-bottom:12px; margin-bottom:12px;">
                         <div style="display:flex; flex-direction:column; width:140px; gap:4px;">
                             <strong style="color:#7f8c8d;">Wiersz 3:</strong>
@@ -214,7 +226,7 @@
                             </div>
                         </div>
                     </div>
-                    
+                    <!-- Wiersz 4 -->
                     <div style="display:flex; gap:20px; align-items:center;">
                         <div style="display:flex; flex-direction:column; width:140px; gap:4px;">
                             <strong style="color:#7f8c8d;">Wiersz 4:</strong>
@@ -233,7 +245,6 @@
                             </div>
                         </div>
                     </div>
-                    
                 </div>
             </div>
             
@@ -258,8 +269,195 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- SEKCJA 3: BILANS -->
+        <div class="section" id="bilans-section">
+            <h3>3. Wzór bilansu małej jednostki (Załącznik nr 5)</h3>
+            <p style="font-size: 0.9em; color: #7f8c8d;">Wprowadź wartości w odpowiednie pozycje aktywów i pasywów.</p>
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                
+                <!-- AKTYWA -->
+                <div style="flex: 1; min-width: 45%;">
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Aktywa</th>
+                                <th style="width: 100px;">Wartość</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="bold-row"><td>A. Aktywa trwałe</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-1">I. Wartości niematerialne i prawne</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-1">II. Rzeczowe aktywa trwałe, w tym:</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-2">- środki trwałe</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-2">- środki trwałe w budowie</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-1">III. Należności długoterminowe</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-1">IV. Inwestycje długoterminowe, w tym:</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-2">- nieruchomości</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-2">- długoterminowe aktywa finansowe</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-1">V. Długoterminowe rozliczenia międzyokresowe</td><td><input type="text"></td></tr>
+                            
+                            <tr class="bold-row"><td>B. Aktywa obrotowe</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-1">I. Zapasy</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-1">II. Należności krótkoterminowe, w tym:</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-2">a) z tytułu dostaw i usług, w tym:</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-3">- do 12 miesięcy</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-3">- powyżej 12 miesięcy</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-1">III. Inwestycje krótkoterminowe, w tym:</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-2">a) krótkoterminowe aktywa finansowe, w tym:</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-3">- środki pieniężne w kasie i na rachunkach</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-1">IV. Krótkoterminowe rozliczenia międzyokresowe</td><td><input type="text"></td></tr>
+                            
+                            <tr class="bold-row"><td>C. Należne wpłaty na kapitał (fundusz) podstawowy</td><td><input type="text"></td></tr>
+                            <tr class="bold-row"><td>D. Udziały (akcje) własne</td><td><input type="text"></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- PASYWA -->
+                <div style="flex: 1; min-width: 45%;">
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Pasywa</th>
+                                <th style="width: 100px;">Wartość</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="bold-row"><td>A. Kapitał (fundusz) własny</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-1">I. Kapitał (fundusz) podstawowy</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-1">II. Kapitał (fundusz) zapasowy, w tym:</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-2">- nadwyżka wartości sprzedaży (wartości emisyjnej) nad wartością nominalną udziałów (akcji)</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-1">III. Kapitał (fundusz) z aktualizacji wyceny, w tym:</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-2">- z tytułu aktualizacji wartości godziwej</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-1">IV. Pozostałe kapitały (fundusze) rezerwowe</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-1">V. Zysk (strata) z lat ubiegłych</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-1">VI. Zysk (strata) netto</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-1">VII. Odpisy z zysku netto w ciągu roku obrotowego (wielkość ujemna)</td><td><input type="text"></td></tr>
+                            
+                            <tr class="bold-row"><td>B. Zobowiązania i rezerwy na zobowiązania</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-1">I. Rezerwy na zobowiązania, w tym:</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-2">- rezerwa na świadczenia emerytalne i podobne</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-1">II. Zobowiązania długoterminowe, w tym:</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-2">- z tytułu kredytów i pożyczek</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-1">III. Zobowiązania krótkoterminowe, w tym:</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-2">a) z tytułu kredytów i pożyczek</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-2">b) z tytułu dostaw i usług, w tym:</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-3">- do 12 miesięcy</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-3">- powyżej 12 miesięcy</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-2">c) fundusze specjalne</td><td><input type="text"></td></tr>
+                            <tr><td class="indent-1">IV. Rozliczenia międzyokresowe</td><td><input type="text"></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEKCJA 4: RZiS KALKULACYJNY -->
+        <div class="section" id="rzis-kalk-section">
+            <h3>4. Rachunek zysków i strat - wariant kalkulacyjny (Załącznik nr 5)</h3>
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>Pozycja</th>
+                        <th style="width: 50px;">Nr</th>
+                        <th style="width: 130px;">Rok bieżący</th>
+                        <th style="width: 130px;">Rok poprzedni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="bold-row"><td>A. Przychody netto ze sprzedaży produktów i towarów</td><td class="center-col">1</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr class="bold-row"><td>B. Koszty sprzedanych produktów i towarów</td><td class="center-col">2</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr class="bold-row"><td>C. Koszty sprzedaży</td><td class="center-col">3</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr class="bold-row"><td>D. Koszty ogólnego zarządu</td><td class="center-col">4</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr class="bold-row"><td>E. Zysk (strata) ze sprzedaży (A-B-C-D)</td><td class="center-col">5</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr class="bold-row"><td>F. Pozostałe przychody operacyjne, w tym:</td><td class="center-col">6</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">- aktualizacja wartości aktywów niefinansowych</td><td class="center-col">7</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr class="bold-row"><td>G. Pozostałe koszty operacyjne, w tym:</td><td class="center-col">8</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">- aktualizacja wartości aktywów niefinansowych</td><td class="center-col">9</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr class="bold-row"><td>H. Przychody finansowe, w tym:</td><td class="center-col">10</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">I. Dywidendy i udziały w zyskach od jednostek, w których jednostka posiada zaangażowanie w kapitale, w tym:</td><td class="center-col">11</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-2">- od jednostek powiązanych, w których jednostka posiada zaangażowanie w kapitale</td><td class="center-col">12</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">II. Odsetki, w tym:</td><td class="center-col">13</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-2">- od jednostek powiązanych</td><td class="center-col">14</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">III. Zysk z tytułu rozchodu aktywów finansowych, w tym:</td><td class="center-col">15</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-2">- w jednostkach powiązanych</td><td class="center-col">16</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">IV. Aktualizacja wartości aktywów finansowych</td><td class="center-col">17</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr class="bold-row"><td>I. Koszty finansowe, w tym:</td><td class="center-col">18</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">I. Odsetki, w tym:</td><td class="center-col">19</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-2">- dla jednostek powiązanych</td><td class="center-col">20</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">II. Strata z tytułu rozchodu aktywów finansowych, w tym:</td><td class="center-col">21</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-2">- w jednostkach powiązanych</td><td class="center-col">22</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">III. Aktualizacja wartości aktywów finansowych</td><td class="center-col">23</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr class="bold-row"><td>J. Zysk (strata) brutto (E+F-G+H-I)</td><td class="center-col">24</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr class="bold-row"><td>K. Podatek dochodowy</td><td class="center-col">25</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr class="bold-row"><td>L. Zysk (strata) netto (J-K)</td><td class="center-col">26</td><td><input type="text"></td><td><input type="text"></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SEKCJA 5: RZiS PORÓWNAWCZY -->
+        <div class="section" id="rzis-por-section">
+            <h3>5. Rachunek zysków i strat - wariant porównawczy (Załącznik nr 5)</h3>
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>Pozycja</th>
+                        <th style="width: 50px;">Nr</th>
+                        <th style="width: 130px;">Rok bieżący</th>
+                        <th style="width: 130px;">Rok poprzedni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="bold-row"><td>A. Przychody netto ze sprzedaży i zrównane z nimi</td><td class="center-col">1</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">I. Przychody netto ze sprzedaży</td><td class="center-col">2</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">II. Zmiana stanu produktów (zwiększenie - wartość dodatnia, zmniejszenie - wartość ujemna)</td><td class="center-col">3</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">III. Koszt wytworzenia produktów na własne potrzeby jednostki</td><td class="center-col">4</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    
+                    <tr class="bold-row"><td>B. Koszty działalności operacyjnej</td><td class="center-col">5</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">I. Amortyzacja</td><td class="center-col">6</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">II. Zużycie materiałów i energii</td><td class="center-col">7</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">III. Usługi obce</td><td class="center-col">8</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">IV. Wynagrodzenia</td><td class="center-col">9</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">V. Ubezpieczenia społeczne i inne świadczenia, w tym:</td><td class="center-col">10</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-2">- emerytalne</td><td class="center-col">11</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">VI. Pozostałe koszty, w tym:</td><td class="center-col">12</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-2">- wartość sprzedanych towarów</td><td class="center-col">13</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    
+                    <tr class="bold-row"><td>C. Zysk (strata) ze sprzedaży (A-B)</td><td class="center-col">14</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    
+                    <tr class="bold-row"><td>D. Pozostałe przychody operacyjne, w tym:</td><td class="center-col">15</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">- aktualizacja wartości aktywów niefinansowych</td><td class="center-col">16</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    
+                    <tr class="bold-row"><td>E. Pozostałe koszty operacyjne, w tym:</td><td class="center-col">17</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">- aktualizacja wartości aktywów niefinansowych</td><td class="center-col">18</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    
+                    <tr class="bold-row"><td>F. Przychody finansowe, w tym:</td><td class="center-col">19</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">I. Dywidendy i udziały w zyskach od jednostek, w których jednostka posiada zaangażowanie w kapitale, w tym:</td><td class="center-col">20</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-2">- od jednostek powiązanych, w których jednostka posiada zaangażowanie w kapitale</td><td class="center-col">21</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">II. Odsetki, w tym:</td><td class="center-col">22</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-2">- od jednostek powiązanych</td><td class="center-col">23</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">III. Zysk z tytułu rozchodu aktywów finansowych, w tym:</td><td class="center-col">24</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-2">- w jednostkach powiązanych</td><td class="center-col">25</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">IV. Aktualizacja wartości aktywów finansowych</td><td class="center-col">26</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    
+                    <tr class="bold-row"><td>G. Koszty finansowe, w tym:</td><td class="center-col">27</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">I. Odsetki, w tym:</td><td class="center-col">28</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-2">- dla jednostek powiązanych</td><td class="center-col">29</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">II. Strata z tytułu rozchodu aktywów finansowych, w tym:</td><td class="center-col">30</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-2">- w jednostkach powiązanych</td><td class="center-col">31</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr><td class="indent-1">III. Aktualizacja wartości aktywów finansowych</td><td class="center-col">32</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    
+                    <tr class="bold-row"><td>H. Zysk (strata) brutto (C+D-E+F-G)</td><td class="center-col">33</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr class="bold-row"><td>I. Podatek dochodowy</td><td class="center-col">34</td><td><input type="text"></td><td><input type="text"></td></tr>
+                    <tr class="bold-row"><td>J. Zysk (strata) netto (H-I)</td><td class="center-col">35</td><td><input type="text"></td><td><input type="text"></td></tr>
+                </tbody>
+            </table>
+        </div>
+
     </div>
 
+    <!-- PYSCRIPT ZOSTAWIONY DOKŁADNIE TAK JAK W ORYGINALE -->
     <script type="py">
         import js
         import re
@@ -494,11 +692,9 @@
         def is_wynikowe(code):
             return code.startswith('4') or code.startswith('5') or code.startswith('7') or code == '870'
 
-        # ZMIENNE STANU
         t_accounts_store = {}
         journal_store = []
 
-        # --- LOGIKA ZAMYKANIA KONT ---
         def toggle_close(code):
             if code not in t_accounts_store:
                 t_accounts_store[code] = {"wn": [], "ma": [], "closed": False, "closing_data": {"ow":"", "om":"", "sw":"", "sm":"", "cw":"", "cm":""}}
@@ -515,7 +711,6 @@
         js.window.toggle_close_py = toggle_close
         js.window.update_closing_py = update_closing
 
-        # --- GENEROWANIE DANYCH DO WIDOKÓW ---
         def get_aggregated_data_for_view():
             agg = {}
             for code, data in t_accounts_store.items():
@@ -549,7 +744,6 @@
         def force_sync_t_accounts(e):
             render_t_accounts()
 
-        # --- LOGIKA DEKRETACJI (DZIENNIK) ---
         def add_journal(e):
             op_no = js.document.getElementById("j_op").value.strip()
             if not op_no:
@@ -644,7 +838,6 @@
         js.window.edit_journal_py = edit_journal
         js.window.del_journal_py = del_journal
 
-        # --- LOGIKA KONT T-OWYCH (WIZUALNA) ---
         def add_t_account(e):
             select_elem = js.document.getElementById("t_account_select")
             if select_elem.selectedIndex == -1: return 
@@ -725,8 +918,6 @@
                 
                 if data['closed']:
                     c_data = data['closing_data']
-                    
-                    # Automatyczne podliczanie obrotów dla obu stron
                     sum_wn = sum(x['amt'] for x in data['wn'])
                     sum_ma = sum(x['amt'] for x in data['ma'])
                     
