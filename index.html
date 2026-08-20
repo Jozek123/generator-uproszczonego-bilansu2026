@@ -53,28 +53,59 @@
         
         .val { text-align: right; }
 
-        /* Ustawienia wydruku (tylko otwarte konta T-owe) */
+        /* Dedykowany styl wydruku mieści całość na 1 stronie A4 */
+        @page {
+            size: A4 portrait;
+            margin: 8mm;
+        }
+
         @media print {
-            body { background: white; margin: 0; padding: 0; }
-            .container { box-shadow: none; padding: 0; margin: 0; border: none; max-width: 100%; }
+            html, body { 
+                background: white; 
+                margin: 0; 
+                padding: 0; 
+                height: 100%;
+                overflow: hidden; 
+                font-size: 11px;
+            }
+            .container { box-shadow: none; padding: 0; margin: 0; border: none; max-width: 100%; width: 100%; }
             
             /* Ukrywanie zbędnych elementów UI */
             h2, h3, .input-group, .sync-btn, .print-btn, #journal-section { display: none !important; }
             #section-t-accounts { border: none; padding: 0; margin: 0; background: transparent; }
+            #section-t-accounts h3 { display: none !important; }
             .t-input-row, .op-actions, .dz-badge { display: none !important; }
             
-            /* Formatowanie kont T-owych na kartce */
-            #t-accounts-container { display: flex; flex-wrap: wrap; gap: 40px; justify-content: space-around; }
-            .t-account { 
-                width: 45%; /* Dwa konta w rzędzie */
-                border: none; /* Ukryte zewnętrzne krawędzie tworzą kształt otwartego T */
-                box-shadow: none; 
-                margin-bottom: 60px; 
-                page-break-inside: avoid; 
+            /* Formatowanie i skalowanie kont T-owych */
+            #t-accounts-container { 
+                display: flex !important; 
+                flex-wrap: wrap !important; 
+                gap: 12px !important; 
+                justify-content: flex-start !important; 
+                align-content: flex-start !important;
+                max-height: 98vh;
             }
-            .t-header { background: transparent; border-bottom: 3px solid black; font-size: 1.1em; }
-            .t-body { min-height: 250px; /* Gwarantuje miejsce pod spodem na wpisy długopisem */ }
-            .t-wn { border-right: 3px solid black; } /* Główna pionowa linia konta */
+            .t-account { 
+                flex: 1 1 calc(33.33% - 12px); /* Przeskalowywanie: 3 w rzędzie lub elastycznie */
+                min-width: 28%;
+                max-width: 48%;
+                border: none !important; 
+                box-shadow: none !important; 
+                margin-bottom: 15px !important; 
+                page-break-inside: avoid; 
+                box-sizing: border-box;
+            }
+            .t-header { 
+                background: transparent; 
+                border-bottom: 2px solid black; 
+                font-size: 1em; 
+                padding: 3px 0;
+            }
+            .t-body { 
+                min-height: 80px; /* Przestrzeń do dorysowania wpisów długopisem */
+            }
+            .t-wn { border-right: 2px solid black; } 
+            .t-row { font-size: 0.85em; margin-bottom: 2px; }
         }
     </style>
 </head>
@@ -100,7 +131,7 @@
 
         <!-- SEKCJA 2: DEKRETACJA OPERACJI GOSPODARCZYCH -->
         <div class="section" id="journal-section">
-            <h3>2. Dekretacja operacji gospodarczych (Dziennik)</h3>
+            <h3>2. Dekretacja operacji gospodarchych (Dziennik)</h3>
             <div class="input-group">
                 <input type="text" id="j_op" placeholder="Nr op. (np. 1)" style="width: 100px; font-weight: bold; background: #e8f8f5;">
                 <span style="font-size: 0.9em; color: #7f8c8d;">W ramach jednego numeru możesz zaksięgować operację złożoną (niewypełnione wiersze zostaną pominięte).</span>
@@ -190,7 +221,7 @@
             </div>
             
             <div class="input-group">
-                <button py-click="add_journal" style="background-color: #27ae60; width: 100%; font-size: 1.1em; padding: 12px; margin-top: 5px;">Dodaj zapis do Dziennika</button>
+                <button py-click="add_journal" style="background-color: #27ae60; width: 100%; font-size: 1.1em; padding: 12px; margin-top: 5px;">Dekretuj</button>
             </div>
             
             <table class="generic-table" style="margin-top: 15px;">
@@ -670,11 +701,9 @@
                     <div class="t-header">{code} {acc_info[0]}</div>
                     <div class="t-body">
                         <div class="t-side t-wn">
-                            <div style="text-align:center; font-weight:bold; margin-bottom:5px;">Dt (Wn)</div>
                             {wn_html}
                         </div>
                         <div class="t-side">
-                            <div style="text-align:center; font-weight:bold; margin-bottom:5px;">Ct (Ma)</div>
                             {ma_html}
                         </div>
                     </div>
