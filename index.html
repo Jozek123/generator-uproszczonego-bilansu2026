@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Kompleksowy Generator Bilansu + Księga Główna</title>
+    <title>Dekretacja i Księga Główna</title>
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
     <style>
@@ -25,9 +25,8 @@
         
         .action-btn { background-color: #27ae60; font-size: 1.1em; width: 100%; margin-top: 10px; padding: 12px; }
         .action-btn:hover { background-color: #219653; }
-        .action-btn-purple { background-color: #8e44ad; font-size: 1.1em; width: 100%; margin-top: 10px; padding: 12px; }
-        .action-btn-purple:hover { background-color: #732d91; }
-        .close-btn { background-color: #f39c12; width: 100%; margin-top: 15px; padding: 10px;}
+        .print-btn { background-color: #8e44ad; width: 100%; margin-top: 15px; padding: 10px; color: white; border:none; font-size: 1.1em; cursor: pointer; font-weight: bold;}
+        .print-btn:hover { background-color: #732d91; }
         .sync-btn { background-color: #34495e; width: 100%; margin-top: 10px; color: white; padding: 10px; font-size: 1em; border:none; border-radius:4px; cursor:pointer;}
         .sync-btn:hover { background-color: #2c3e50; }
         
@@ -44,51 +43,47 @@
         .op-btn:hover { color: #e74c3c; transform: scale(1.1); }
         .dz-badge { color: #8e44ad; font-size: 0.8em; font-weight: bold; cursor: help; }
         
-        .t-input-row { display: flex; flex-direction: column; gap: 5px; margin-top: auto; padding-top: 10px;}
+        .t-input-row { display: flex; flex-direction: column; gap: 5px; margin-top: auto; padding-top: 10px; border-top: 1px dashed #ccc;}
         .t-input-row input { width: 100%; box-sizing: border-box; padding: 4px; font-size: 0.85em; }
         
-        /* Styl zamykania kont */
-        .t-footer { width: 100%; display: flex; flex-direction: column; font-size: 0.85em;}
-        .t-closure-obroty { display: flex; border-top: 1px solid #000; padding-top: 2px; }
-        .t-closure-sk { display: flex; padding-bottom: 2px; }
-        .t-closure-final { display: flex; border-top: 1px solid #000; border-bottom: 4px double #000; font-weight: bold; margin-bottom: 8px; padding: 2px 0; }
-        .col-half { width: 50%; padding: 0 5px; box-sizing: border-box; }
-        .border-mid { border-right: 3px solid #2c3e50; }
-        
-        /* Tabele Ogólne (Zestawienie Obrotów i Sald + Dziennik) */
+        /* Tabele Ogólne (Dziennik) */
         .generic-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9em; background: #fff; }
         .generic-table th, .generic-table td { border: 1px solid #7f8c8d; padding: 6px; text-align: left; vertical-align: middle; }
         .generic-table th { background-color: #bdc3c7; text-align: center; font-size: 1em; }
         
-        /* Tabele Bilansu - Symetryczne i zawijające tekst */
-        .balance-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9em; background: #fff; table-layout: fixed; }
-        .balance-table th, .balance-table td { border: 1px solid #7f8c8d; padding: 6px; text-align: left; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; }
-        .balance-table th { background-color: #bdc3c7; text-align: center; font-size: 1em; }
-
-        .section-header { font-weight: bold; background-color: #ecf0f1; }
-        .main-total { font-weight: bold; font-size: 1.1em; background-color: #95a5a6; color: white; }
         .val { text-align: right; }
-        
-        .report-header { text-align: center; margin-top: 30px; margin-bottom: 20px; }
-        .report-header h3 { border: none; margin: 5px 0; padding: 0; }
-        .report-header h4 { margin: 5px 0; color: #7f8c8d; font-weight: normal; }
+
+        /* Ustawienia wydruku (tylko otwarte konta T-owe) */
+        @media print {
+            body { background: white; margin: 0; padding: 0; }
+            .container { box-shadow: none; padding: 0; margin: 0; border: none; max-width: 100%; }
+            
+            /* Ukrywanie zbędnych elementów UI */
+            h2, h3, .input-group, .sync-btn, .print-btn, #journal-section { display: none !important; }
+            #section-t-accounts { border: none; padding: 0; margin: 0; background: transparent; }
+            .t-input-row, .op-actions, .dz-badge { display: none !important; }
+            
+            /* Formatowanie kont T-owych na kartce */
+            #t-accounts-container { display: flex; flex-wrap: wrap; gap: 40px; justify-content: space-around; }
+            .t-account { 
+                width: 45%; /* Dwa konta w rzędzie */
+                border: none; /* Ukryte zewnętrzne krawędzie tworzą kształt otwartego T */
+                box-shadow: none; 
+                margin-bottom: 60px; 
+                page-break-inside: avoid; 
+            }
+            .t-header { background: transparent; border-bottom: 3px solid black; font-size: 1.1em; }
+            .t-body { min-height: 250px; /* Gwarantuje miejsce pod spodem na wpisy długopisem */ }
+            .t-wn { border-right: 3px solid black; } /* Główna pionowa linia konta */
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2 style="text-align: center;">Księga Główna i Sprawozdania Finansowe</h2>
-        
-        <!-- SEKCJA 0: DANE JEDNOSTKI -->
-        <div class="section">
-            <h3>Dane Jednostki</h3>
-            <div class="input-group">
-                <input type="text" id="entity_name" placeholder="Nazwa jednostki (np. ABC Sp. z o.o.)" style="width: 350px;">
-                <label>Data sporządzenia: <input type="date" id="report_date"></label>
-            </div>
-        </div>
+        <h2 style="text-align: center;">Księgowanie - Dziennik i Księga Główna</h2>
 
         <!-- SEKCJA 1: KONTA T-OWE -->
-        <div class="section">
+        <div class="section" id="section-t-accounts">
             <h3>1. Księga Główna (Konta T-owe - wizualne)</h3>
             <div class="input-group">
                 <label>Wybierz konto: </label>
@@ -100,11 +95,11 @@
             <div id="t-accounts-container"></div>
             
             <button class="sync-btn" py-click="force_sync_t_accounts">🔄 AKTUALIZUJ KONTA T-OWE (Pobierz dekrety z Dziennika)</button>
-            <button class="close-btn" id="toggle-btn" py-click="toggle_t_accounts">ZAMKNIJ KONTA T-OWE (Pociągnij salda do podsumowań)</button>
+            <button class="print-btn" onclick="window.print()">🖨️ WYDRUKUJ OTWARTE KONTA T-OWE (do uzupełnienia długopisem)</button>
         </div>
 
         <!-- SEKCJA 2: DEKRETACJA OPERACJI GOSPODARCZYCH -->
-        <div class="section">
+        <div class="section" id="journal-section">
             <h3>2. Dekretacja operacji gospodarczych (Dziennik)</h3>
             <div class="input-group">
                 <input type="text" id="j_op" placeholder="Nr op. (np. 1)" style="width: 100px; font-weight: bold; background: #e8f8f5;">
@@ -114,7 +109,7 @@
             <div style="background: #fdfdfd; padding: 20px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px;">
                 <div style="display:flex; flex-direction:column; width: 100%;">
                     
-                    <!-- Wiersz 1 -->
+                    <!-- Wiersze dekretacji (1-4) -->
                     <div style="display:flex; gap:20px; align-items:center; border-bottom:1px solid #eaeaea; padding-bottom:12px; margin-bottom:12px;">
                         <div style="display:flex; flex-direction:column; width:140px; gap:4px;">
                             <strong style="color:#7f8c8d;">Wiersz 1:</strong>
@@ -134,7 +129,6 @@
                         </div>
                     </div>
                     
-                    <!-- Wiersz 2 -->
                     <div style="display:flex; gap:20px; align-items:center; border-bottom:1px solid #eaeaea; padding-bottom:12px; margin-bottom:12px;">
                         <div style="display:flex; flex-direction:column; width:140px; gap:4px;">
                             <strong style="color:#7f8c8d;">Wiersz 2:</strong>
@@ -154,7 +148,6 @@
                         </div>
                     </div>
                     
-                    <!-- Wiersz 3 -->
                     <div style="display:flex; gap:20px; align-items:center; border-bottom:1px solid #eaeaea; padding-bottom:12px; margin-bottom:12px;">
                         <div style="display:flex; flex-direction:column; width:140px; gap:4px;">
                             <strong style="color:#7f8c8d;">Wiersz 3:</strong>
@@ -174,7 +167,6 @@
                         </div>
                     </div>
                     
-                    <!-- Wiersz 4 -->
                     <div style="display:flex; gap:20px; align-items:center;">
                         <div style="display:flex; flex-direction:column; width:140px; gap:4px;">
                             <strong style="color:#7f8c8d;">Wiersz 4:</strong>
@@ -198,7 +190,7 @@
             </div>
             
             <div class="input-group">
-                <button py-click="add_journal" style="background-color: #8e44ad; width: 100%; font-size: 1.1em; padding: 12px; margin-top: 5px;">Dodaj zapis (Dekretuj podanym numerem)</button>
+                <button py-click="add_journal" style="background-color: #27ae60; width: 100%; font-size: 1.1em; padding: 12px; margin-top: 5px;">Dodaj zapis do Dziennika</button>
             </div>
             
             <table class="generic-table" style="margin-top: 15px;">
@@ -218,77 +210,6 @@
                 </tbody>
             </table>
         </div>
-
-        <!-- SEKCJA 3: RĘCZNE WPROWADZANIE DO BILANSU -->
-        <div class="section">
-            <h3>3. Bezpośrednie wprowadzanie do bilansu (Opcjonalnie)</h3>
-            <div class="input-group">
-                <input type="text" id="item_number" placeholder="Nr (np. 1)" style="width: 80px;">
-                <input type="text" id="amount" placeholder="Kwota (np. 1 000 000,50)">
-                <select id="category">
-                    <!-- AKTYWA -->
-                    <option disabled style="font-weight:bold; background:#eee; color:#000;">AKTYWA</option>
-                    <option disabled style="font-weight:bold; color:#333;">A. Aktywa trwałe</option>
-                    <option value="ak_a_i">A.I. Wartości niematerialne i prawne</option>
-                    <option value="ak_a_ii">A.II. Rzeczowe aktywa trwałe, w tym:</option>
-                    <option value="ak_a_ii_1">&nbsp;&nbsp;A.II.1. - środki trwałe</option>
-                    <option value="ak_a_ii_2">&nbsp;&nbsp;A.II.2. - środki trwałe w budowie</option>
-                    <option value="ak_a_iii">A.III. Należności długoterminowe</option>
-                    <option value="ak_a_iv">A.IV. Inwestycje długoterminowe, w tym:</option>
-                    <option value="ak_a_iv_1">&nbsp;&nbsp;A.IV.1. - nieruchomości</option>
-                    <option value="ak_a_iv_2">&nbsp;&nbsp;A.IV.2. - długoterminowe aktywa finansowe</option>
-                    <option value="ak_a_v">A.V. Długoterminowe rozliczenia międzyokresowe</option>
-                    
-                    <option disabled style="font-weight:bold; color:#333;">B. Aktywa obrotowe</option>
-                    <option value="ak_b_i">B.I. Zapasy</option>
-                    <option value="ak_b_ii">B.II. Należności krótkoterminowe, w tym:</option>
-                    <option value="ak_b_ii_a">&nbsp;&nbsp;B.II.a) z tytułu dostaw i usług, w tym:</option>
-                    <option value="ak_b_ii_a_1">&nbsp;&nbsp;&nbsp;&nbsp;B.II.a)1. - do 12 miesięcy</option>
-                    <option value="ak_b_ii_a_2">&nbsp;&nbsp;&nbsp;&nbsp;B.II.a)2. - powyżej 12 miesięcy</option>
-                    <option value="ak_b_iii">B.III. Inwestycje krótkoterminowe, w tym:</option>
-                    <option value="ak_b_iii_a">&nbsp;&nbsp;B.III.a) krótkoterminowe aktywa finansowe, w tym:</option>
-                    <option value="ak_b_iii_a_1">&nbsp;&nbsp;&nbsp;&nbsp;B.III.a)1. - środki pieniężne w kasie i na rachunkach</option>
-                    <option value="ak_b_iv">B.IV. Krótkoterminowe rozliczenia międzyokresowe</option>
-                    
-                    <option value="ak_c" style="font-weight:bold; color:#333;">C. Należne wpłaty na kapitał (fundusz) podstawowy</option>
-                    <option value="ak_d" style="font-weight:bold; color:#333;">D. Udziały (akcje) własne</option>
-                    
-                    <!-- PASYWA -->
-                    <option disabled style="font-weight:bold; background:#eee; color:#000;">PASYWA</option>
-                    <option disabled style="font-weight:bold; color:#333;">A. Kapitał (fundusz) własny</option>
-                    <option value="pa_a_i">A.I. Kapitał (fundusz) podstawowy</option>
-                    <option value="pa_a_ii">A.II. Kapitał (fundusz) zapasowy, w tym:</option>
-                    <option value="pa_a_ii_1">&nbsp;&nbsp;A.II.1. - nadwyżka wartości sprzedaży (wartości emisyjnej) nad wartością nominalną udziałów (akcji)</option>
-                    <option value="pa_a_iii">A.III. Kapitał (fundusz) z aktualizacji wyceny, w tym:</option>
-                    <option value="pa_a_iii_1">&nbsp;&nbsp;A.III.1. - z tytułu aktualizacji wartości godziwej</option>
-                    <option value="pa_a_iv">A.IV. Pozostałe kapitały (fundusze) rezerwowe</option>
-                    <option value="pa_a_v">A.V. Zysk (strata) z lat ubiegłych</option>
-                    <option value="pa_a_vi">A.VI. Zysk (strata) netto</option>
-                    <option value="pa_a_vii">A.VII. Odpisy z zysku netto w ciągu roku obrotowego (wielkość ujemna)</option>
-                    
-                    <option disabled style="font-weight:bold; color:#333;">B. Zobowiązania i rezerwy na zobowiązania</option>
-                    <option value="pa_b_i">B.I. Rezerwy na zobowiązania, w tym:</option>
-                    <option value="pa_b_i_1">&nbsp;&nbsp;B.I.1. - rezerwa na świadczenia emerytalne i podobne</option>
-                    <option value="pa_b_ii">B.II. Zobowiązania długoterminowe, w tym:</option>
-                    <option value="pa_b_ii_1">&nbsp;&nbsp;B.II.1. - z tytułu kredytów i pożyczek</option>
-                    <option value="pa_b_iii">B.III. Zobowiązania krótkoterminowe, w tym:</option>
-                    <option value="pa_b_iii_a">&nbsp;&nbsp;B.III.a) z tytułu kredytów i pożyczek</option>
-                    <option value="pa_b_iii_b">&nbsp;&nbsp;B.III.b) z tytułu dostaw i usług, w tym:</option>
-                    <option value="pa_b_iii_b_1">&nbsp;&nbsp;&nbsp;&nbsp;B.III.b)1. - do 12 miesięcy</option>
-                    <option value="pa_b_iii_b_2">&nbsp;&nbsp;&nbsp;&nbsp;B.III.b)2. - powyżej 12 miesięcy</option>
-                    <option value="pa_b_iii_c">&nbsp;&nbsp;B.III.c) fundusze specjalne</option>
-                    <option value="pa_b_iv">B.IV. Rozliczenia międzyokresowe</option>
-                </select>
-                <button py-click="add_manual_item">Dodaj składnik ręcznie</button>
-            </div>
-            <ul id="items-list" style="list-style-type: none; padding: 0;"></ul>
-        </div>
-
-        <button class="action-btn-purple" py-click="generate_trial_balance">GENERUJ ZESTAWIENIE OBROTÓW I SALD</button>
-        <button class="action-btn" py-click="generate_balance">GENERUJ ZBIORCZY BILANS</button>
-        
-        <div id="zestawienie-output"></div>
-        <div id="bilans-output"></div>
     </div>
 
     <script type="py">
@@ -476,7 +397,6 @@
             select_id = e.target.id.replace("search", "acc")
             populate_select(select_id, e.target.value)
 
-        # Obsługa klawisza Enter
         def handle_enter_t(e):
             if e.key == "Enter":
                 e.preventDefault()
@@ -498,7 +418,6 @@
                         sel.value = opt.value
                         break
 
-        # Inicjalizacja selectów
         populate_select("t_account_select")
         for i in range(1, 5):
             populate_select(f"j_acc_wn_{i}")
@@ -514,33 +433,26 @@
             val_str = str(val_str).replace(" ", "").replace(",", ".")
             return float(val_str)
 
-        # Inteligentne sortowanie uwzględniające Sp na samym początku oraz storno na końcu
         def complex_sort_key(s):
             s_str = str(s).strip().lower()
             if s_str in ['sp', 'bo']:
                 return (0, [])
-            if s_str.startswith('storno'):
-                return (2, [])
             parts = []
             for text in re.split('([0-9]+)', str(s)):
                 if text.isdigit(): parts.append(int(text))
                 elif text: parts.append(text.lower())
             return (1, parts)
 
-        # Sprawdzenie czy konto jest wynikowe (4,5,7,870)
         def is_wynikowe(code):
             return code.startswith('4') or code.startswith('5') or code.startswith('7') or code == '870'
 
         # ZMIENNE STANU
-        manual_store = []
         t_accounts_store = {}
         journal_store = []
-        accounts_closed = False
 
         # --- GENEROWANIE DANYCH DO WIDOKÓW (SPINA T-KONTA Z DZIENNIKIEM) ---
         def get_aggregated_data_for_view():
             agg = {}
-            # 1. Ręczne operacje z kont T-owych
             for code, data in t_accounts_store.items():
                 if code not in agg: agg[code] = {"wn": [], "ma": []}
                 for i, op in enumerate(data["wn"]):
@@ -548,7 +460,6 @@
                 for i, op in enumerate(data["ma"]):
                     agg[code]["ma"].append({"op": op["op"], "amt": op["amt"], "type": "t", "idx": i})
                 
-            # 2. Operacje z Dziennika
             for i, item in enumerate(journal_store):
                 if item["wn_code"]:
                     if item["wn_code"] not in agg: agg[item["wn_code"]] = {"wn": [], "ma": []}
@@ -557,7 +468,6 @@
                     if item["ma_code"] not in agg: agg[item["ma_code"]] = {"wn": [], "ma": []}
                     agg[item["ma_code"]]["ma"].append({"op": item["no"], "amt": item["amount"], "type": "j", "idx": i})
             
-            # 3. Sortowanie by Sp wylądowało na górze, a storno na dole
             for code in agg:
                 agg[code]["wn"].sort(key=lambda x: complex_sort_key(x["op"]))
                 agg[code]["ma"].sort(key=lambda x: complex_sort_key(x["op"]))
@@ -602,12 +512,6 @@
             if added_any:
                 journal_store.sort(key=lambda x: complex_sort_key(x['no']))
                 render_journal()
-                
-                global accounts_closed
-                if accounts_closed:
-                    accounts_closed = False
-                    update_toggle_btn()
-                
                 render_t_accounts()
                 
                 js.document.getElementById("j_op").value = ""
@@ -648,7 +552,6 @@
             js.document.getElementById("j_acc_wn_1").value = item['wn_code']
             js.document.getElementById("j_acc_ma_1").value = item['ma_code']
             
-            # Wyczyść wiersze 2, 3, 4
             for i in range(2, 5):
                 js.document.getElementById(f"j_amt_{i}").value = ""
                 js.document.getElementById(f"j_acc_wn_{i}").selectedIndex = 0
@@ -658,22 +561,12 @@
                 
             journal_store.pop(index)
             render_journal()
-            
-            global accounts_closed
-            if accounts_closed:
-                accounts_closed = False
-                update_toggle_btn()
             render_t_accounts()
             
         def del_journal(index):
             if js.confirm("Czy usunąć ten wiersz dekretu? (Zmiana odzwierciedli się na kontach T-owych)"):
                 journal_store.pop(index)
                 render_journal()
-                
-                global accounts_closed
-                if accounts_closed:
-                    accounts_closed = False
-                    update_toggle_btn()
                 render_t_accounts()
 
         js.window.edit_journal_py = edit_journal
@@ -687,17 +580,11 @@
             if not code: return
             if code not in t_accounts_store:
                 t_accounts_store[code] = {"wn": [], "ma": []}
-                global accounts_closed
-                accounts_closed = False
-                update_toggle_btn()
                 render_t_accounts()
             else:
                 js.alert("To konto jest już otwarte na planszy!")
 
         def add_operation(code, side):
-            if accounts_closed:
-                js.alert("Konta są zamknięte! Otwórz je przyciskiem, aby edytować.")
-                return
             op_input = js.document.getElementById(f"op_{side}_{code}").value
             amt_input = js.document.getElementById(f"amt_{side}_{code}").value
             if not amt_input: return
@@ -710,7 +597,7 @@
                 t_accounts_store[code][side].append({"op": op, "amt": amt})
                 render_t_accounts()
             except:
-                js.alert("Niepoprawna kwota w operacji.")
+                js.alert("Niepoprawny format kwoty w operacji.")
 
         def edit_operation(code, side, idx):
             op_data = t_accounts_store[code][side][idx]
@@ -722,9 +609,6 @@
             try:
                 amt = parse_pln(new_amt_str)
                 t_accounts_store[code][side][idx] = {"op": new_op_str, "amt": amt}
-                global accounts_closed
-                accounts_closed = False
-                update_toggle_btn()
                 render_t_accounts()
             except ValueError:
                 js.alert("Niepoprawny format kwoty!")
@@ -732,23 +616,11 @@
         def delete_operation(code, side, idx):
             if js.confirm("Czy usunąć tę pozycję z konta?"):
                 t_accounts_store[code][side].pop(idx)
-                global accounts_closed
-                accounts_closed = False
-                update_toggle_btn()
                 render_t_accounts()
 
         js.window.add_op_py = add_operation
         js.window.edit_op_py = edit_operation
         js.window.del_op_py = delete_operation
-
-        def update_toggle_btn():
-            btn = js.document.getElementById("toggle-btn")
-            if accounts_closed:
-                btn.innerText = "OTWÓRZ KONTA T-OWE (Powrót do edycji)"
-                btn.style.backgroundColor = "#e67e22"
-            else:
-                btn.innerText = "ZAMKNIJ KONTA T-OWE (Pociągnij salda do podsumowań)"
-                btn.style.backgroundColor = "#f39c12"
 
         def render_t_accounts():
             container = js.document.getElementById("t-accounts-container")
@@ -776,51 +648,22 @@
                         actions = f"<span class='op-actions dz-badge' title='Operacja z Dziennika. Zmień w tabeli niżej.'>[Dz]</span>"
                     ma_html += f"<div class='t-row'><span>{actions} {fmt_pln(x['amt'])}</span> <span>({x['op']}</span></div>"
                 
-                sum_wn = round(sum([x['amt'] for x in data['wn']]), 2)
-                sum_ma = round(sum([x['amt'] for x in data['ma']]), 2)
-                
-                footer_html = ""
-                if accounts_closed:
-                    sk_wn_text = sk_ma_text = ""
-                    max_sum = max(sum_wn, sum_ma)
-                    if acc_info[1] not in ['R', 'E']:
-                        diff = round(sum_wn - sum_ma, 2)
-                        if diff > 0: sk_ma_text = f"{fmt_pln(diff)} (Sk"
-                        elif diff < 0: sk_wn_text = f"Sk) {fmt_pln(abs(diff))}"
-                    
-                    footer_html = f"""
-                    <div class="t-footer">
-                        <div class="t-closure-obroty">
-                            <div class="col-half border-mid" style="text-align: center;">{fmt_pln(sum_wn)}</div>
-                            <div class="col-half" style="text-align: center;">{fmt_pln(sum_ma)}</div>
+                footer_html = f"""
+                <div class="t-input-row">
+                    <div style="display:flex; justify-content: space-between; gap:5px;">
+                        <div style="width:50%; display:flex; flex-direction:column; gap:2px;">
+                            <input type="text" id="op_wn_{code}" placeholder="Nr (np. Sp)">
+                            <input type="text" id="amt_wn_{code}" placeholder="Kwota Dt">
+                            <button onclick="window.add_op_py('{code}', 'wn')" style="padding:4px;">Księguj Dt</button>
                         </div>
-                        <div class="t-closure-sk">
-                            <div class="col-half border-mid" style="text-align: right;">{sk_wn_text}</div>
-                            <div class="col-half" style="text-align: left;">{sk_ma_text}</div>
-                        </div>
-                        <div class="t-closure-final">
-                            <div class="col-half border-mid" style="text-align: center;">{fmt_pln(max_sum)}</div>
-                            <div class="col-half" style="text-align: center;">{fmt_pln(max_sum)}</div>
+                        <div style="width:50%; display:flex; flex-direction:column; gap:2px;">
+                            <input type="text" id="op_ma_{code}" placeholder="Nr (np. 1)">
+                            <input type="text" id="amt_ma_{code}" placeholder="Kwota Ct">
+                            <button onclick="window.add_op_py('{code}', 'ma')" style="padding:4px;">Księguj Ct</button>
                         </div>
                     </div>
-                    """
-                else:
-                    footer_html = f"""
-                    <div class="t-input-row">
-                        <div style="display:flex; justify-content: space-between; gap:5px;">
-                            <div style="width:50%; display:flex; flex-direction:column; gap:2px;">
-                                <input type="text" id="op_wn_{code}" placeholder="Nr (np. Sp)">
-                                <input type="text" id="amt_wn_{code}" placeholder="Kwota Dt">
-                                <button onclick="window.add_op_py('{code}', 'wn')" style="padding:4px;">Księguj Dt</button>
-                            </div>
-                            <div style="width:50%; display:flex; flex-direction:column; gap:2px;">
-                                <input type="text" id="op_ma_{code}" placeholder="Nr (np. 1)">
-                                <input type="text" id="amt_ma_{code}" placeholder="Kwota Ct">
-                                <button onclick="window.add_op_py('{code}', 'ma')" style="padding:4px;">Księguj Ct</button>
-                            </div>
-                        </div>
-                    </div>
-                    """
+                </div>
+                """
 
                 acc_html = f"""
                 <div class="t-account">
@@ -854,256 +697,6 @@
                 final_html += html_wynikowe
 
             container.innerHTML = final_html
-
-        def toggle_t_accounts(e):
-            global accounts_closed
-            accounts_closed = not accounts_closed
-            update_toggle_btn()
-            render_t_accounts()
-
-        # --- LOGIKA POZYCJI RĘCZNYCH W BILANSIE ---
-        def delete_manual(index):
-            manual_store.pop(index)
-            render_manual_list()
-
-        def edit_manual(index):
-            item = manual_store[index]
-            js.document.getElementById("item_number").value = item.get('no', '')
-            js.document.getElementById("amount").value = fmt_pln(item['amount'])
-            js.document.getElementById("category").value = item['cat']
-            manual_store.pop(index)
-            render_manual_list()
-
-        js.window.delete_manual_py = delete_manual
-        js.window.edit_manual_py = edit_manual
-
-        def render_manual_list():
-            ul = js.document.getElementById("items-list")
-            ul.innerHTML = ""
-            for i, item in enumerate(manual_store):
-                li = js.document.createElement("li")
-                li.style.borderBottom = "1px solid #ddd"
-                li.style.padding = "5px 0"
-                cat_name = js.document.getElementById("category").querySelector(f"option[value='{item['cat']}']").innerText
-                
-                no_str = f"<strong>{item.get('no', '')})</strong> " if item.get('no') else ""
-                li.innerHTML = f"{no_str}<strong>{fmt_pln(item['amount'])}</strong> -> {cat_name.replace('&nbsp;', '')} "
-                
-                btn_del = js.document.createElement("button")
-                btn_del.className = "delete-btn"
-                btn_del.innerText = "Usuń"
-                btn_del.setAttribute("onclick", f"window.delete_manual_py({i})")
-                
-                btn_edit = js.document.createElement("button")
-                btn_edit.className = "edit-btn"
-                btn_edit.innerText = "Edytuj ✎"
-                btn_edit.setAttribute("onclick", f"window.edit_manual_py({i})")
-                
-                li.appendChild(btn_del)
-                li.appendChild(btn_edit)
-                ul.appendChild(li)
-
-        def add_manual_item(e):
-            item_no = js.document.getElementById("item_number").value
-            amt_str = js.document.getElementById("amount").value
-            cat = js.document.getElementById("category").value
-            if not amt_str: return
-            try:
-                amt = parse_pln(amt_str)
-                manual_store.append({"no": item_no, "cat": cat, "amount": amt})
-                manual_store.sort(key=lambda x: complex_sort_key(x.get('no', '')))
-                render_manual_list()
-                js.document.getElementById("item_number").value = ""
-                js.document.getElementById("amount").value = ""
-            except:
-                js.alert("Niepoprawny format kwoty!")
-
-        def get_report_header(title):
-            entity = js.document.getElementById("entity_name").value or "........................................"
-            date = js.document.getElementById("report_date").value or "....................."
-            return f"""
-            <div class='report-header'>
-                <h3>{title}</h3>
-                <h4>Nazwa jednostki: <strong>{entity}</strong></h4>
-                <h4>Sporządzone na dzień: <strong>{date}</strong></h4>
-            </div>
-            """
-
-        def generate_trial_balance(e):
-            html = get_report_header("Zestawienie obrotów i sald kont księgi głównej")
-            html += """
-            <table class="generic-table">
-                <tr>
-                    <th rowspan="2">Nazwa konta</th>
-                    <th colspan="2">Salda na dzień otwarcia ksiąg rachunkowych</th>
-                    <th colspan="2">Obroty za okres sprawozdawczy</th>
-                    <th colspan="2">Obroty narastająco od początku roku (z saldem)</th>
-                    <th colspan="2">Salda na koniec okresu sprawozdawczego</th>
-                </tr>
-                <tr>
-                    <th>Dt</th><th>Ct</th><th>Dt</th><th>Ct</th><th>Dt</th><th>Ct</th><th>Dt</th><th>Ct</th>
-                </tr>
-            """
-            
-            tot_bo_dt = tot_bo_ct = tot_ob_dt = tot_ob_ct = tot_nar_dt = tot_nar_ct = tot_sk_dt = tot_sk_ct = 0
-            
-            agg_data = get_aggregated_data_for_view()
-
-            for code in sorted(agg_data.keys()):
-                data = agg_data[code]
-                name = f"{code} {CHART_OF_ACCOUNTS[code][0]}"
-                
-                bo_dt = round(sum(x['amt'] for x in data['wn'] if x['op'].strip().lower() in ['sp', 'bo']), 2)
-                bo_ct = round(sum(x['amt'] for x in data['ma'] if x['op'].strip().lower() in ['sp', 'bo']), 2)
-                ob_dt = round(sum(x['amt'] for x in data['wn'] if x['op'].strip().lower() not in ['sp', 'bo']), 2)
-                ob_ct = round(sum(x['amt'] for x in data['ma'] if x['op'].strip().lower() not in ['sp', 'bo']), 2)
-                nar_dt = round(bo_dt + ob_dt, 2)
-                nar_ct = round(bo_ct + ob_ct, 2)
-                sk_dt = max(0, nar_dt - nar_ct)
-                sk_ct = max(0, nar_ct - nar_dt)
-                
-                tot_bo_dt += bo_dt; tot_bo_ct += bo_ct
-                tot_ob_dt += ob_dt; tot_ob_ct += ob_ct
-                tot_nar_dt += nar_dt; tot_nar_ct += nar_ct
-                tot_sk_dt += sk_dt; tot_sk_ct += sk_ct
-                
-                html += f"""
-                <tr>
-                    <td>{name}</td>
-                    <td class='val'>{fmt_pln(bo_dt)}</td><td class='val'>{fmt_pln(bo_ct)}</td>
-                    <td class='val'>{fmt_pln(ob_dt)}</td><td class='val'>{fmt_pln(ob_ct)}</td>
-                    <td class='val'>{fmt_pln(nar_dt)}</td><td class='val'>{fmt_pln(nar_ct)}</td>
-                    <td class='val'>{fmt_pln(sk_dt)}</td><td class='val'>{fmt_pln(sk_ct)}</td>
-                </tr>
-                """
-            
-            html += f"""
-                <tr style='font-weight: bold; background-color: #ecf0f1;'>
-                    <td>SUMA</td>
-                    <td class='val'>{fmt_pln(tot_bo_dt)}</td><td class='val'>{fmt_pln(tot_bo_ct)}</td>
-                    <td class='val'>{fmt_pln(tot_ob_dt)}</td><td class='val'>{fmt_pln(tot_ob_ct)}</td>
-                    <td class='val'>{fmt_pln(tot_nar_dt)}</td><td class='val'>{fmt_pln(tot_nar_ct)}</td>
-                    <td class='val'>{fmt_pln(tot_sk_dt)}</td><td class='val'>{fmt_pln(tot_sk_ct)}</td>
-                </tr>
-            </table>
-            """
-            js.document.getElementById("zestawienie-output").innerHTML = html
-            js.document.getElementById("bilans-output").innerHTML = "" 
-            
-            if abs(tot_ob_dt - tot_ob_ct) > 0.01:
-                js.alert("UWAGA! Obroty za okres Dt i Ct nie są sobie równe. Sprawdź poprawność wprowadzonych dekretacji i księgowań!")
-
-        def generate_balance(e):
-            if t_accounts_store and not accounts_closed:
-                js.alert("Masz otwarte konta T-owe! Najpierw zamknij konta żółtym przyciskiem w Sekcji 1.")
-                return
-
-            sums = {
-                "ak_a_i": 0, "ak_a_ii": 0, "ak_a_ii_1": 0, "ak_a_ii_2": 0, "ak_a_iii": 0, "ak_a_iv": 0, "ak_a_iv_1": 0, "ak_a_iv_2": 0, "ak_a_v": 0,
-                "ak_b_i": 0, "ak_b_ii": 0, "ak_b_ii_a": 0, "ak_b_ii_a_1": 0, "ak_b_ii_a_2": 0, "ak_b_iii": 0, "ak_b_iii_a": 0, "ak_b_iii_a_1": 0, "ak_b_iv": 0, "ak_c": 0, "ak_d": 0,
-                "pa_a_i": 0, "pa_a_ii": 0, "pa_a_ii_1": 0, "pa_a_iii": 0, "pa_a_iii_1": 0, "pa_a_iv": 0, "pa_a_v": 0, "pa_a_vi": 0, "pa_a_vii": 0,
-                "pa_b_i": 0, "pa_b_i_1": 0, "pa_b_ii": 0, "pa_b_ii_1": 0, "pa_b_iii": 0, "pa_b_iii_a": 0, "pa_b_iii_b": 0, "pa_b_iii_b_1": 0, "pa_b_iii_b_2": 0, "pa_b_iii_c": 0, "pa_b_iv": 0
-            }
-
-            net_profit_from_operations = 0
-            
-            agg_data = get_aggregated_data_for_view()
-
-            for item in manual_store:
-                if item["cat"] in sums: sums[item["cat"]] += item["amount"]
-
-            for code, data in agg_data.items():
-                acc_info = CHART_OF_ACCOUNTS[code]
-                sum_wn = sum([x['amt'] for x in data['wn']])
-                sum_ma = sum([x['amt'] for x in data['ma']])
-                acc_type = acc_info[1]
-
-                if acc_type == 'A':
-                    saldo = sum_wn - sum_ma
-                    if saldo > 0: sums[acc_info[2]] += saldo
-                elif acc_type == 'P':
-                    saldo = sum_ma - sum_wn
-                    if saldo > 0: sums[acc_info[2]] += saldo
-                elif acc_type == 'A_contra':
-                    saldo = sum_ma - sum_wn
-                    if saldo > 0: sums[acc_info[2]] -= saldo
-                elif acc_type == 'AP':
-                    if sum_wn > sum_ma: sums[acc_info[2]] += (sum_wn - sum_ma)
-                    elif sum_ma > sum_wn: sums[acc_info[3]] += (sum_ma - sum_wn)
-                elif acc_type == 'R': 
-                    net_profit_from_operations += (sum_ma - sum_wn)
-                elif acc_type == 'E': 
-                    net_profit_from_operations -= (sum_wn - sum_ma)
-
-            sums["pa_a_vi"] += net_profit_from_operations
-
-            aktywa_a_ii = sums['ak_a_ii'] + sums['ak_a_ii_1'] + sums['ak_a_ii_2']
-            aktywa_a_iv = sums['ak_a_iv'] + sums['ak_a_iv_1'] + sums['ak_a_iv_2']
-            aktywa_a = sums['ak_a_i'] + aktywa_a_ii + sums['ak_a_iii'] + aktywa_a_iv + sums['ak_a_v']
-            
-            aktywa_b_ii_a = sums['ak_b_ii_a'] + sums['ak_b_ii_a_1'] + sums['ak_b_ii_a_2']
-            aktywa_b_ii = sums['ak_b_ii'] + aktywa_b_ii_a
-            aktywa_b_iii_a = sums['ak_b_iii_a'] + sums['ak_b_iii_a_1']
-            aktywa_b_iii = sums['ak_b_iii'] + aktywa_b_iii_a
-            aktywa_b = sums['ak_b_i'] + aktywa_b_ii + aktywa_b_iii + sums['ak_b_iv']
-            razem_aktywa = aktywa_a + aktywa_b + sums['ak_c'] + sums['ak_d']
-
-            pasywa_a_ii = sums['pa_a_ii'] + sums['pa_a_ii_1']
-            pasywa_a_iii = sums['pa_a_iii'] + sums['pa_a_iii_1']
-            pasywa_a = sums['pa_a_i'] + pasywa_a_ii + pasywa_a_iii + sums['pa_a_iv'] + sums['pa_a_v'] + sums['pa_a_vi'] + sums['pa_a_vii']
-            
-            pasywa_b_i = sums['pa_b_i'] + sums['pa_b_i_1']
-            pasywa_b_ii = sums['pa_b_ii'] + sums['pa_b_ii_1']
-            pasywa_b_iii_b = sums['pa_b_iii_b'] + sums['pa_b_iii_b_1'] + sums['pa_b_iii_b_2']
-            pasywa_b_iii = sums['pa_b_iii'] + sums['pa_b_iii_a'] + pasywa_b_iii_b + sums['pa_b_iii_c']
-            pasywa_b = pasywa_b_i + pasywa_b_ii + pasywa_b_iii + sums['pa_b_iv']
-            razem_pasywa = pasywa_a + pasywa_b
-
-            html = get_report_header("Bilans")
-            html += f"""
-            <table class="balance-table">
-                <colgroup>
-                    <col style="width: 35%;">
-                    <col style="width: 15%;">
-                    <col style="width: 35%;">
-                    <col style="width: 15%;">
-                </colgroup>
-                <tr><th colspan="2">AKTYWA</th><th colspan="2">PASYWA</th></tr>
-                
-                <tr><td class='section-header'>A. Aktywa trwałe</td><td class='section-header val'>{fmt_pln(aktywa_a)}</td><td class='section-header'>A. Kapitał (fundusz) własny</td><td class='section-header val'>{fmt_pln(pasywa_a)}</td></tr>
-                <tr><td><b>A.I.</b> Wartości niematerialne i prawne</td><td class='val'>{fmt_pln(sums['ak_a_i'])}</td><td><b>A.I.</b> Kapitał (fundusz) podstawowy</td><td class='val'>{fmt_pln(sums['pa_a_i'])}</td></tr>
-                <tr><td><b>A.II.</b> Rzeczowe aktywa trwałe, w tym:</td><td class='val'>{fmt_pln(aktywa_a_ii)}</td><td><b>A.II.</b> Kapitał (fundusz) zapasowy, w tym:</td><td class='val'>{fmt_pln(pasywa_a_ii)}</td></tr>
-                <tr><td style="padding-left: 20px;"><b>A.II.1.</b> - środki trwałe</td><td class='val'>{fmt_pln(sums['ak_a_ii_1'])}</td><td style="padding-left: 20px;"><b>A.II.1.</b> - nadwyżka wartości sprzedaży (wartości emisyjnej) nad wartością nominalną udziałów (akcji)</td><td class='val'>{fmt_pln(sums['pa_a_ii_1'])}</td></tr>
-                <tr><td style="padding-left: 20px;"><b>A.II.2.</b> - środki trwałe w budowie</td><td class='val'>{fmt_pln(sums['ak_a_ii_2'])}</td><td><b>A.III.</b> Kapitał (fundusz) z aktualizacji wyceny, w tym:</td><td class='val'>{fmt_pln(pasywa_a_iii)}</td></tr>
-                <tr><td><b>A.III.</b> Należności długoterminowe</td><td class='val'>{fmt_pln(sums['ak_a_iii'])}</td><td style="padding-left: 20px;"><b>A.III.1.</b> - z tytułu aktualizacji wartości godziwej</td><td class='val'>{fmt_pln(sums['pa_a_iii_1'])}</td></tr>
-                <tr><td><b>A.IV.</b> Inwestycje długoterminowe, w tym:</td><td class='val'>{fmt_pln(aktywa_a_iv)}</td><td><b>A.IV.</b> Pozostałe kapitały (fundusze) rezerwowe</td><td class='val'>{fmt_pln(sums['pa_a_iv'])}</td></tr>
-                <tr><td style="padding-left: 20px;"><b>A.IV.1.</b> - nieruchomości</td><td class='val'>{fmt_pln(sums['ak_a_iv_1'])}</td><td><b>A.V.</b> Zysk (strata) z lat ubiegłych</td><td class='val'>{fmt_pln(sums['pa_a_v'])}</td></tr>
-                <tr><td style="padding-left: 20px;"><b>A.IV.2.</b> - długoterminowe aktywa finansowe</td><td class='val'>{fmt_pln(sums['ak_a_iv_2'])}</td><td><b>A.VI.</b> Zysk (strata) netto</td><td class='val'><strong>{fmt_pln(sums['pa_a_vi'])}</strong></td></tr>
-                <tr><td><b>A.V.</b> Długoterminowe rozliczenia międzyokresowe</td><td class='val'>{fmt_pln(sums['ak_a_v'])}</td><td><b>A.VII.</b> Odpisy z zysku netto w ciągu roku obrotowego (wielkość ujemna)</td><td class='val'>{fmt_pln(sums['pa_a_vii'])}</td></tr>
-                
-                <tr><td class='section-header'>B. Aktywa obrotowe</td><td class='section-header val'>{fmt_pln(aktywa_b)}</td><td class='section-header'>B. Zobowiązania i rezerwy na zobowiązania</td><td class='section-header val'>{fmt_pln(pasywa_b)}</td></tr>
-                <tr><td><b>B.I.</b> Zapasy</td><td class='val'>{fmt_pln(sums['ak_b_i'])}</td><td><b>B.I.</b> Rezerwy na zobowiązania, w tym:</td><td class='val'>{fmt_pln(pasywa_b_i)}</td></tr>
-                <tr><td><b>B.II.</b> Należności krótkoterminowe, w tym:</td><td class='val'>{fmt_pln(aktywa_b_ii)}</td><td style="padding-left: 20px;"><b>B.I.1.</b> - rezerwa na świadczenia emerytalne i podobne</td><td class='val'>{fmt_pln(sums['pa_b_i_1'])}</td></tr>
-                <tr><td style="padding-left: 20px;"><b>B.II.a)</b> z tytułu dostaw i usług, w tym:</td><td class='val'>{fmt_pln(aktywa_b_ii_a)}</td><td><b>B.II.</b> Zobowiązania długoterminowe, w tym:</td><td class='val'>{fmt_pln(pasywa_b_ii)}</td></tr>
-                <tr><td style="padding-left: 40px;"><b>B.II.a)1.</b> - do 12 miesięcy</td><td class='val'>{fmt_pln(sums['ak_b_ii_a_1'])}</td><td style="padding-left: 20px;"><b>B.II.1.</b> - z tytułu kredytów i pożyczek</td><td class='val'>{fmt_pln(sums['pa_b_ii_1'])}</td></tr>
-                <tr><td style="padding-left: 40px;"><b>B.II.a)2.</b> - powyżej 12 miesięcy</td><td class='val'>{fmt_pln(sums['ak_b_ii_a_2'])}</td><td><b>B.III.</b> Zobowiązania krótkoterminowe, w tym:</td><td class='val'>{fmt_pln(pasywa_b_iii)}</td></tr>
-                <tr><td><b>B.III.</b> Inwestycje krótkoterminowe, w tym:</td><td class='val'>{fmt_pln(aktywa_b_iii)}</td><td style="padding-left: 20px;"><b>B.III.a)</b> z tytułu kredytów i pożyczek</td><td class='val'>{fmt_pln(sums['pa_b_iii_a'])}</td></tr>
-                <tr><td style="padding-left: 20px;"><b>B.III.a)</b> krótkoterminowe aktywa finansowe, w tym:</td><td class='val'>{fmt_pln(aktywa_b_iii_a)}</td><td style="padding-left: 20px;"><b>B.III.b)</b> z tytułu dostaw i usług, w tym:</td><td class='val'>{fmt_pln(pasywa_b_iii_b)}</td></tr>
-                <tr><td style="padding-left: 40px;"><b>B.III.a)1.</b> - środki pieniężne w kasie i na rachunkach</td><td class='val'>{fmt_pln(sums['ak_b_iii_a_1'])}</td><td style="padding-left: 40px;"><b>B.III.b)1.</b> - do 12 miesięcy</td><td class='val'>{fmt_pln(sums['pa_b_iii_b_1'])}</td></tr>
-                <tr><td><b>B.IV.</b> Krótkoterminowe rozliczenia międzyokresowe</td><td class='val'>{fmt_pln(sums['ak_b_iv'])}</td><td style="padding-left: 40px;"><b>B.III.b)2.</b> - powyżej 12 miesięcy</td><td class='val'>{fmt_pln(sums['pa_b_iii_b_2'])}</td></tr>
-                <tr><td class='section-header'>C. Należne wpłaty na kapitał (fundusz) podstawowy</td><td class='section-header val'>{fmt_pln(sums['ak_c'])}</td><td style="padding-left: 20px;"><b>B.III.c)</b> fundusze specjalne</td><td class='val'>{fmt_pln(sums['pa_b_iii_c'])}</td></tr>
-                <tr><td class='section-header'>D. Udziały (akcje) własne</td><td class='section-header val'>{fmt_pln(sums['ak_d'])}</td><td><b>B.IV.</b> Rozliczenia międzyokresowe</td><td class='val'>{fmt_pln(sums['pa_b_iv'])}</td></tr>
-                
-                <tr><td class='main-total'>Aktywa razem</td><td class='main-total val'>{fmt_pln(razem_aktywa)}</td><td class='main-total'>Pasywa razem</td><td class='main-total val'>{fmt_pln(razem_pasywa)}</td></tr>
-            </table>
-            """
-            js.document.getElementById("bilans-output").innerHTML = html
-            js.document.getElementById("zestawienie-output").innerHTML = ""
-            
-            diff = abs(razem_aktywa - razem_pasywa)
-            if diff > 0.01:
-                js.alert(f"UWAGA! Bilans się nie zgadza. Różnica wynosi: {fmt_pln(diff)} PLN.\\nSprawdź Zestawienie Obrotów i Sald, by znaleźć błąd!")
-
     </script>
 </body>
 </html>
