@@ -682,12 +682,12 @@
         def complex_sort_key(s):
             s_str = str(s).strip().lower()
             if s_str in ['sp', 'bo']:
-                return (0, [])
+                return (0, "")
             parts = []
             for text in re.split('([0-9]+)', str(s)):
-                if text.isdigit(): parts.append(int(text))
+                if text.isdigit(): parts.append(f"{int(text):06d}")
                 elif text: parts.append(text.lower())
-            return (1, parts)
+            return (1, "".join(parts))
 
         def is_wynikowe(code):
             return code.startswith('4') or code.startswith('5') or code.startswith('7') or code == '870'
