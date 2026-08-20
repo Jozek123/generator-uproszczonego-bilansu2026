@@ -1,210 +1,798 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <title>Konto T-owe - Zamykanie Konta</title>
-  <style>
-    .t-account {
-      width: 360px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      padding: 12px;
-      font-family: Arial, sans-serif;
-      background: #fff;
-    }
+    <meta charset="UTF-8">
+    <title>Dekretacja i Księga Główna</title>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f1f4f8; color: #333; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+        h2, h3 { color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
+        
+        .section { margin-bottom: 30px; padding: 20px; background: #fdfdfd; border: 1px solid #e0e0e0; border-radius: 5px; }
+        .input-group { margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;}
+        select, input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; }
+        input[type="text"] { min-width: 150px; }
+        select { min-width: 450px; }
+        button { padding: 8px 15px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s;}
+        button:hover { background-color: #2980b9; }
+        
+        .delete-btn { background-color: #e74c3c; padding: 4px 8px; margin-left: 10px; font-size: 0.8em; }
+        .delete-btn:hover { background-color: #c0392b; }
+        .edit-btn { background-color: #f39c12; padding: 4px 8px; margin-left: 5px; font-size: 0.8em; }
+        .edit-btn:hover { background-color: #d68910; }
+        
+        .action-btn { background-color: #27ae60; font-size: 1.1em; width: 100%; margin-top: 10px; padding: 12px; }
+        .action-btn:hover { background-color: #219653; }
+        .print-btn { background-color: #8e44ad; width: 100%; margin-top: 15px; padding: 10px; color: white; border:none; font-size: 1.1em; cursor: pointer; font-weight: bold;}
+        .print-btn:hover { background-color: #732d91; }
+        .sync-btn { background-color: #34495e; width: 100%; margin-top: 10px; color: white; padding: 10px; font-size: 1em; border:none; border-radius:4px; cursor:pointer;}
+        .sync-btn:hover { background-color: #2c3e50; }
+        
+        /* Konta T-owe */
+        #t-accounts-container { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 15px; justify-content: center; }
+        .t-account { width: 320px; border: 1px solid #bdc3c7; background: #fff; box-shadow: 2px 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column;}
+        .t-header { text-align: center; font-weight: bold; font-size: 0.95em; border-bottom: 3px solid #2c3e50; padding: 8px; background: #ecf0f1; }
+        .t-body { display: flex; flex-grow: 1; }
+        .t-side { width: 50%; padding: 5px; box-sizing: border-box; display: flex; flex-direction: column;}
+        .t-wn { border-right: 3px solid #2c3e50; }
+        .t-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85em; margin-bottom: 4px; padding-bottom: 2px;}
+        .op-actions { display: flex; gap: 3px; align-items: center;}
+        .op-btn { background: none; border: none; cursor: pointer; padding: 0 3px; font-size: 1em; color: #7f8c8d; }
+        .op-btn:hover { color: #e74c3c; transform: scale(1.1); }
+        .dz-badge { color: #8e44ad; font-size: 0.8em; font-weight: bold; cursor: help; }
+        
+        .t-input-row { display: flex; flex-direction: column; gap: 5px; margin-top: auto; padding-top: 10px; border-top: 1px dashed #ccc;}
+        .t-input-row input { width: 100%; box-sizing: border-box; padding: 4px; font-size: 0.85em; }
 
-    .t-header {
-      text-align: center;
-      font-weight: bold;
-      font-size: 1.1em;
-      border-bottom: 2px solid #000;
-      padding-bottom: 6px;
-      margin-bottom: 10px;
-    }
+        /* Style dla zamykania kont T-owych */
+        .close-btn { background-color: #95a5a6; color: white; border: none; padding: 4px; border-radius: 3px; cursor: pointer; width: 100%; transition: 0.2s;}
+        .close-btn:hover { background-color: #7f8c8d; }
+        .closing-input { width: 100%; box-sizing: border-box; font-size: 0.85em; text-align: center; padding: 2px; border: 1px dashed #ccc; background: #f9f9f9;}
+        .sum-input { font-weight: bold; }
+        
+        /* Tabele Ogólne (Dziennik) */
+        .generic-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9em; background: #fff; }
+        .generic-table th, .generic-table td { border: 1px solid #7f8c8d; padding: 6px; text-align: left; vertical-align: middle; }
+        .generic-table th { background-color: #bdc3c7; text-align: center; font-size: 1em; }
+        
+        .val { text-align: right; }
 
-    .t-body {
-      display: flex;
-      position: relative;
-      min-height: 120px;
-    }
+        /* Dedykowany styl wydruku */
+        @page {
+            size: A4 portrait;
+            margin: 8mm;
+        }
 
-    /* Pionowa linia konta T */
-    .t-body::before {
-      content: '';
-      position: absolute;
-      left: 50%;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: #000;
-      transform: translateX(-50%);
-    }
+        @media print {
+            html, body { 
+                background: white; 
+                margin: 0; 
+                padding: 0; 
+                font-size: 10px;
+            }
+            .container { box-shadow: none; padding: 0; margin: 0; border: none; max-width: 100%; width: 100%; }
+            
+            /* Ukrywanie zbędnych elementów UI */
+            h2, h3, .input-group, .sync-btn, .print-btn, #journal-section { display: none !important; }
+            #section-t-accounts { border: none; padding: 0; margin: 0; background: transparent; }
+            #section-t-accounts h3 { display: none !important; }
+            .t-input-row, .op-actions, .dz-badge { display: none !important; }
+            .close-btn { display: none !important; }
+            
+            /* Dopasowanie notatnika na wydruku */
+            #notepad { border: 1px solid #ccc !important; }
+            
+            /* Dopasowanie inputów zamykania na wydruku */
+            .closing-input { border: none !important; background: transparent !important; padding: 0 !important;}
 
-    .t-col {
-      flex: 1;
-      padding: 0 10px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .col-title {
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
-    .col-title.dt { text-align: left; }
-    .col-title.ct { text-align: right; }
-
-    .entries-list {
-      flex-grow: 1;
-    }
-
-    .entry {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 4px;
-      font-size: 0.95em;
-    }
-
-    /* Jedno podkreślenie oddzielające wpisy od obrotów i salda */
-    .single-underline {
-      border-top: 1px solid #000;
-      margin-top: 8px;
-      padding-top: 4px;
-    }
-
-    .sum-row {
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      min-height: 24px;
-      margin-bottom: 2px;
-    }
-
-    .sk-row {
-      color: #d93025;
-    }
-
-    /* Stylizacja pola input dla ręcznego wpisywania salda */
-    .sk-input {
-      width: 60px;
-      text-align: right;
-      font-weight: bold;
-      color: #d93025;
-      border: 1px dashed #ccc;
-      border-radius: 4px;
-      padding: 2px 4px;
-      outline: none;
-      font-size: 0.95em;
-    }
-
-    .sk-input:focus {
-      border-color: #d93025;
-      background-color: #fce8e6;
-    }
-
-    /* Ukrycie strzałek w polu typu number */
-    .sk-input::-webkit-outer-spin-button,
-    .sk-input::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-    .sk-input[type=number] {
-      -moz-appearance: textfield;
-    }
-
-    .btn-close {
-      margin-top: 16px;
-      width: 100%;
-      padding: 10px;
-      background-color: #2b6cb0;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 1em;
-    }
-
-    .btn-close:hover {
-      background-color: #2c5282;
-    }
-  </style>
+            /* Formatowanie i skalowanie kont T-owych */
+            #t-accounts-container { 
+                display: flex !important; 
+                flex-wrap: wrap !important; 
+                gap: 12px !important; 
+                justify-content: flex-start !important; 
+                align-content: flex-start !important;
+            }
+            .t-account { 
+                flex: 1 1 calc(33.33% - 12px); 
+                min-width: 28%;
+                max-width: 48%;
+                border: none !important; 
+                box-shadow: none !important; 
+                margin-bottom: 15px !important; 
+                page-break-inside: avoid; 
+                break-inside: avoid;
+                box-sizing: border-box;
+            }
+            .t-header { 
+                background: transparent; 
+                border-bottom: 2px solid black; 
+                font-size: 1em; 
+                padding: 3px 0;
+            }
+            .t-body { 
+                min-height: 80px; 
+            }
+            .t-wn { border-right: 2px solid black; } 
+            .t-row { font-size: 0.85em; margin-bottom: 2px; }
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <h2 style="text-align: center;">Księgowanie - Dziennik i Księga Główna</h2>
 
-<div class="t-account" id="account-1">
-  <div class="t-header">Konto: Kasowe</div>
-  
-  <div class="t-body">
-    <!-- Strona Debetowa (Dt) -->
-    <div class="t-col">
-      <div class="col-title dt">Dt</div>
-      <div class="entries-list" id="dt-list">
-        <div class="entry"><span>Sp.</span><span class="dt-val">1000</span></div>
-        <div class="entry"><span>1.</span><span class="dt-val">500</span></div>
-        <div class="entry"><span>2.</span><span class="dt-val">200</span></div>
-      </div>
-      
-      <!-- Podsumowanie po stronie Dt -->
-      <div class="single-underline">
-        <div class="sum-row">
-          <span>Obr.</span>
-          <span id="dt-obroty"></span>
+        <!-- SEKCJA 0: NOTATNIK -->
+        <div class="section" id="notepad-section">
+            <h3>Notatnik</h3>
+            <textarea id="notepad" style="width: 100%; height: 120px; padding: 10px; font-family: inherit; border: 1px solid #ccc; border-radius: 4px; resize: vertical; box-sizing: border-box;" placeholder="Miejsce na Twoje notatki (np. obliczenia, odpowiedzi do zadań, zestawienia majątku)..."></textarea>
         </div>
-        <div class="sum-row sk-row">
-          <span>Sk.</span>
-          <input type="number" class="sk-input" placeholder="..." />
+
+        <!-- SEKCJA 1: KONTA T-OWE -->
+        <div class="section" id="section-t-accounts">
+            <h3>1. Księga Główna (Konta T-owe - wizualne)</h3>
+            <div class="input-group">
+                <label>Wybierz konto: </label>
+                <input type="text" id="account_search" placeholder="Szukaj (np. Kasa, 130)..." py-input="filter_accounts" py-keydown="handle_enter_t" style="width: 200px;">
+                <select id="t_account_select" style="min-width: 400px; max-width: 500px;"></select>
+                <button py-click="add_t_account">Utwórz konto T-owe ręcznie</button>
+            </div>
+            
+            <div id="t-accounts-container"></div>
+            
+            <button class="sync-btn" py-click="force_sync_t_accounts">🔄 AKTUALIZUJ KONTA T-OWE (Pobierz dekrety z Dziennika)</button>
+            <button class="print-btn" onclick="window.print()">🖨️ WYDRUKUJ OTWARTE KONTA T-OWE (do uzupełnienia długopisem)</button>
         </div>
-      </div>
+
+        <!-- SEKCJA 2: DEKRETACJA OPERACJI GOSPODARCZYCH -->
+        <div class="section" id="journal-section">
+            <h3>2. Dekretacja operacji gospodarchych (Dziennik)</h3>
+            <div class="input-group">
+                <input type="text" id="j_op" placeholder="Nr op. (np. 1)" style="width: 100px; font-weight: bold; background: #e8f8f5;">
+                <span style="font-size: 0.9em; color: #7f8c8d;">W ramach jednego numeru możesz zaksięgować operację złożoną (niewypełnione wiersze zostaną pominięte).</span>
+            </div>
+            
+            <div style="background: #fdfdfd; padding: 20px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px;">
+                <div style="display:flex; flex-direction:column; width: 100%;">
+                    
+                    <!-- Wiersze dekretacji (1-4) -->
+                    <div style="display:flex; gap:20px; align-items:center; border-bottom:1px solid #eaeaea; padding-bottom:12px; margin-bottom:12px;">
+                        <div style="display:flex; flex-direction:column; width:140px; gap:4px;">
+                            <strong style="color:#7f8c8d;">Wiersz 1:</strong>
+                            <input type="text" id="j_amt_1" placeholder="Kwota (np. 1500,50)" style="width:100%;">
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <label style="width:65px; font-weight:bold; text-align:right;">Wn (Dt):</label>
+                                <input type="text" id="j_search_wn_1" placeholder="Szukaj Wn..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 120px;">
+                                <select id="j_acc_wn_1" style="min-width: 320px; max-width: 320px;"></select>
+                            </div>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <label style="width:65px; font-weight:bold; text-align:right;">Ma (Ct):</label>
+                                <input type="text" id="j_search_ma_1" placeholder="Szukaj Ma..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 120px;">
+                                <select id="j_acc_ma_1" style="min-width: 320px; max-width: 320px;"></select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display:flex; gap:20px; align-items:center; border-bottom:1px solid #eaeaea; padding-bottom:12px; margin-bottom:12px;">
+                        <div style="display:flex; flex-direction:column; width:140px; gap:4px;">
+                            <strong style="color:#7f8c8d;">Wiersz 2:</strong>
+                            <input type="text" id="j_amt_2" placeholder="Kwota" style="width:100%;">
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <label style="width:65px; font-weight:bold; text-align:right;">Wn (Dt):</label>
+                                <input type="text" id="j_search_wn_2" placeholder="Szukaj Wn..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 120px;">
+                                <select id="j_acc_wn_2" style="min-width: 320px; max-width: 320px;"></select>
+                            </div>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <label style="width:65px; font-weight:bold; text-align:right;">Ma (Ct):</label>
+                                <input type="text" id="j_search_ma_2" placeholder="Szukaj Ma..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 120px;">
+                                <select id="j_acc_ma_2" style="min-width: 320px; max-width: 320px;"></select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display:flex; gap:20px; align-items:center; border-bottom:1px solid #eaeaea; padding-bottom:12px; margin-bottom:12px;">
+                        <div style="display:flex; flex-direction:column; width:140px; gap:4px;">
+                            <strong style="color:#7f8c8d;">Wiersz 3:</strong>
+                            <input type="text" id="j_amt_3" placeholder="Kwota" style="width:100%;">
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <label style="width:65px; font-weight:bold; text-align:right;">Wn (Dt):</label>
+                                <input type="text" id="j_search_wn_3" placeholder="Szukaj Wn..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 120px;">
+                                <select id="j_acc_wn_3" style="min-width: 320px; max-width: 320px;"></select>
+                            </div>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <label style="width:65px; font-weight:bold; text-align:right;">Ma (Ct):</label>
+                                <input type="text" id="j_search_ma_3" placeholder="Szukaj Ma..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 120px;">
+                                <select id="j_acc_ma_3" style="min-width: 320px; max-width: 320px;"></select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display:flex; gap:20px; align-items:center;">
+                        <div style="display:flex; flex-direction:column; width:140px; gap:4px;">
+                            <strong style="color:#7f8c8d;">Wiersz 4:</strong>
+                            <input type="text" id="j_amt_4" placeholder="Kwota" style="width:100%;">
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <label style="width:65px; font-weight:bold; text-align:right;">Wn (Dt):</label>
+                                <input type="text" id="j_search_wn_4" placeholder="Szukaj Wn..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 120px;">
+                                <select id="j_acc_wn_4" style="min-width: 320px; max-width: 320px;"></select>
+                            </div>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <label style="width:65px; font-weight:bold; text-align:right;">Ma (Ct):</label>
+                                <input type="text" id="j_search_ma_4" placeholder="Szukaj Ma..." py-input="filter_j" py-keydown="handle_enter_j" style="width: 120px;">
+                                <select id="j_acc_ma_4" style="min-width: 320px; max-width: 320px;"></select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <button py-click="add_journal" style="background-color: #27ae60; width: 100%; font-size: 1.1em; padding: 12px; margin-top: 5px;">Dekretuj</button>
+            </div>
+            
+            <table class="generic-table" style="margin-top: 15px;">
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="width: 8%;">Nr op.</th>
+                        <th rowspan="2" style="width: 15%;">Kwota</th>
+                        <th colspan="2">Konto (symbol, nazwa)</th>
+                        <th rowspan="2" style="width: 12%;">Akcje</th>
+                    </tr>
+                    <tr>
+                        <th style="width: 32.5%;">Wn (Dt)</th>
+                        <th style="width: 32.5%;">Ma (Ct)</th>
+                    </tr>
+                </thead>
+                <tbody id="journal-tbody">
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <!-- Strona Kredytowa (Ct) -->
-    <div class="t-col">
-      <div class="col-title ct">Ct</div>
-      <div class="entries-list" id="ct-list">
-        <div class="entry"><span>3.</span><span class="ct-val">300</span></div>
-        <div class="entry"><span>4.</span><span class="ct-val">100</span></div>
-      </div>
-      
-      <!-- Podsumowanie po stronie Ct -->
-      <div class="single-underline">
-        <div class="sum-row">
-          <span>Obr.</span>
-          <span id="ct-obroty"></span>
-        </div>
-        <div class="sum-row sk-row">
-          <span>Sk.</span>
-          <input type="number" class="sk-input" placeholder="..." />
-        </div>
-      </div>
-    </div>
-  </div>
+    <script type="py">
+        import js
+        import re
 
-  <button class="btn-close" onclick="zamknijKonto()">Zamknij konto</button>
-</div>
+        CHART_OF_ACCOUNTS = {
+            "010": ["Środki trwałe", "A", "ak_a_ii_1"],
+            "010-1": ["Grunty (w tym prawo użytkowania wieczystego gruntu)", "A", "ak_a_ii_1"],
+            "010-2": ["Budynki, lokale, prawa do lokali, obiekty inżynierii lądowej i wodnej", "A", "ak_a_ii_1"],
+            "010-3": ["Urządzenia techniczne i maszyny", "A", "ak_a_ii_1"],
+            "010-4": ["Środki transportu", "A", "ak_a_ii_1"],
+            "010-5": ["Inne środki trwałe", "A", "ak_a_ii_1"],
+            "020": ["Wartości niematerialne i prawne", "A", "ak_a_i"],
+            "030": ["Inwestycje długoterminowe", "A", "ak_a_iv_2"],
+            "030-1": ["Nieruchomości inwestycyjne", "A", "ak_a_iv_1"],
+            "030-2": ["Inwestycje w wartości niematerialne i prawne", "A", "ak_a_iv_2"],
+            "030-3": ["Udziały i akcje w innych jednostkach", "A", "ak_a_iv_2"],
+            "030-4": ["Inne długoterminowe papiery wartościowe", "A", "ak_a_iv_2"],
+            "030-5": ["Inne długoterminowe aktywa finansowe", "A", "ak_a_iv_2"],
+            "030-6": ["Inne inwestycje długoterminowe", "A", "ak_a_iv_2"],
+            "070": ["Umorzenie środków trwałych", "A_contra", "ak_a_ii_1"],
+            "070-1": ["Umorzenie gruntów (w tym prawa użytkowania wieczystego gruntu)", "A_contra", "ak_a_ii_1"],
+            "070-2": ["Umorzenie budynków, lokali, praw do lokali, obiektów inżynierii lądowej i wodnej", "A_contra", "ak_a_ii_1"],
+            "070-3": ["Umorzenie urządzeń technicznych i maszyn", "A_contra", "ak_a_ii_1"],
+            "070-4": ["Umorzenie środków transportu", "A_contra", "ak_a_ii_1"],
+            "070-5": ["Umorzenie innych środków trwałych", "A_contra", "ak_a_ii_1"],
+            "075": ["Umorzenie wartości niematerialnych i prawnych", "A_contra", "ak_a_i"],
+            "080": ["Środki trwałe w budowie", "A", "ak_a_ii_2"],
+            "099": ["Konta pozabilansowe", "None", ""],
+            "099-3": ["Środki trwałe w likwidacji", "None", ""],
+            "100": ["Kasa", "A", "ak_b_iii_a_1"],
+            "130": ["Rachunki bankowe podstawowe", "A", "ak_b_iii_a_1"],
+            "130-1": ["Rachunek bieżący", "A", "ak_b_iii_a_1"],
+            "130-2": ["Rachunek VAT", "A", "ak_b_iii_a_1"],
+            "132": ["Rachunki bankowe pomocnicze", "A", "ak_b_iii_a_1"],
+            "133": ["Lokaty bankowe", "A", "ak_b_iii_a_1"],
+            "133-1": ["Lokaty bankowe - długoterminowe", "A", "ak_a_iv_2"],
+            "133-2": ["Lokaty bankowe - krótkoterminowe", "A", "ak_b_iii_a_1"],
+            "134": ["Kredyty bankowe", "P", "pa_b_iii_a"],
+            "134-1": ["Kredyty bankowe - długoterminowe", "P", "pa_b_ii_1"],
+            "134-2": ["Kredyty bankowe - krótkoterminowe", "P", "pa_b_iii_a"],
+            "139": ["Środki pieniężne w drodze", "A", "ak_b_iii_a_1"],
+            "140": ["Pozostałe krótkoterminowe aktywa finansowe", "A", "ak_b_iii_a_1"],
+            "141": ["Inne inwestycje krótkoterminowe", "A", "ak_b_iii_a_1"],
+            "160": ["Udziały (akcje) własne", "A", "ak_d"],
+            "200": ["Rozrachunki z odbiorcami", "AP", "ak_b_ii_a_1", "pa_b_iii_b_1"],
+            "202": ["Rozrachunki z dostawcami", "AP", "ak_b_ii_a_1", "pa_b_iii_b_1"],
+            "220": ["Rozrachunki publicznoprawne", "AP", "ak_b_ii_a_1", "pa_b_iii_b_1"],
+            "220-1": ["Rozrachunki z tytułu VAT", "AP", "ak_b_ii_a_1", "pa_b_iii_b_1"],
+            "220-2": ["Rozrachunki z tytułu podatku dochodowego od osób fizycznych", "AP", "ak_b_ii_a_1", "pa_b_iii_b_1"],
+            "220-3": ["Rozrachunki z tytułu podatku dochodowego od osób prawnych", "AP", "ak_b_ii_a_1", "pa_b_iii_b_1"],
+            "220-4": ["Rozrachunki z ZUS", "AP", "ak_b_ii_a_1", "pa_b_iii_b_1"],
+            "220-6": ["Pozostałe rozrachunki publicznoprawne", "AP", "ak_b_ii_a_1", "pa_b_iii_b_1"],
+            "221": ["Rozliczenie VAT należnego i naliczonego", "AP", "ak_b_ii_a_1", "pa_b_iii_b_1"],
+            "221-1": ["VAT należny", "AP", "ak_b_ii_a_1", "pa_b_iii_b_1"],
+            "221-2": ["VAT naliczony", "AP", "ak_b_ii_a_1", "pa_b_iii_b_1"],
+            "230": ["Rozrachunki z tytułu wynagrodzeń", "AP", "ak_b_ii_a_1", "pa_b_iii_b_1"],
+            "234": ["Pozostałe rozrachunki z pracownikami", "AP", "ak_b_ii_a_1", "pa_b_iii_b_1"],
+            "240": ["Rozrachunki z tytułu nabycia i rozchodu niefinansowych aktywów trwałych", "AP", "ak_b_ii_a_1", "pa_b_iii_b_1"],
+            "240-1": ["Rozrachunki z tytułu nabycia niefinansowych aktywów trwałych", "AP", "ak_b_ii_a_1", "pa_b_iii_b_1"],
+            "240-2": ["Rozrachunki z tytułu rozchodu niefinansowych aktywów trwałych", "AP", "ak_b_ii_a_1", "pa_b_iii_b_1"],
+            "241": ["Udzielone pożyczki (instrumenty finansowe)", "A", "ak_b_iii_a_1"],
+            "241-1": ["Udzielone pożyczki - długoterminowe", "A", "ak_a_iv_2"],
+            "241-2": ["Udzielone pożyczki - krótkoterminowe", "A", "ak_b_iii_a_1"],
+            "242": ["Otrzymane pożyczki (instrumenty finansowe)", "P", "pa_b_iii_a"],
+            "242-1": ["Otrzymane pożyczki - długoterminowe", "P", "pa_b_ii_1"],
+            "242-2": ["Otrzymane pożyczki - krótkoterminowe", "P", "pa_b_iii_a"],
+            "245": ["Należne wpłaty na kapitał (fundusz) własny", "A", "ak_c"],
+            "249": ["Pozostałe rozrachunki", "AP", "ak_b_ii_a_1", "pa_b_iii_b_1"],
+            "300": ["Rozliczenie zakupu", "AP", "ak_b_i", "pa_b_iii_b_1"],
+            "300-1": ["Rozliczenie zakupu wartości niematerialnych i prawnych", "AP", "ak_b_i", "pa_b_iii_b_1"],
+            "300-2": ["Rozliczenie zakupu środków trwałych i środków trwałych w budowie", "AP", "ak_b_i", "pa_b_iii_b_1"],
+            "300-3": ["Rozliczenie zakupu materiałów", "AP", "ak_b_i", "pa_b_iii_b_1"],
+            "300-4": ["Rozliczenie zakupu towarów", "AP", "ak_b_i", "pa_b_iii_b_1"],
+            "310": ["Materiały", "A", "ak_b_i"],
+            "330": ["Towary", "A", "ak_b_i"],
+            "400": ["Amortyzacja", "E", ""],
+            "401": ["Zużycie materiałów i energii", "E", ""],
+            "402": ["Usługi obce", "E", ""],
+            "403": ["Podatki i opłaty", "E", ""],
+            "404": ["Wynagrodzenia", "E", ""],
+            "405": ["Ubezpieczenia społeczne i inne świadczenia", "E", ""],
+            "409": ["Pozostałe koszty rodzajowe", "E", ""],
+            "490": ["Rozliczenie kosztów rodzajowych", "E", ""],
+            "500": ["Koszty działalności podstawowej", "E", ""],
+            "500-1": ["Koszty produkcji wyrobów", "E", ""],
+            "500-2": ["Koszty działalności usługowej", "E", ""],
+            "500-3": ["Koszty działalności handlowej", "E", ""],
+            "540": ["Koszty sprzedaży", "E", ""],
+            "550": ["Koszty ogólnego zarządu", "E", ""],
+            "600": ["Wyroby (produkty)", "A", "ak_b_i"],
+            "600-1": ["Wyroby (produkty) gotowe", "A", "ak_b_i"],
+            "600-2": ["Półprodukty", "A", "ak_b_i"],
+            "600-3": ["Produkty w toku", "A", "ak_b_i"],
+            "640": ["Rozliczenia międzyokresowe", "AP", "ak_b_iv", "pa_b_iv"],
+            "700": ["Przychody ze sprzedaży produktów", "R", ""],
+            "700-1": ["Przychody ze sprzedaży wyrobów gotowych", "R", ""],
+            "700-2": ["Przychody ze sprzedaży usług", "R", ""],
+            "711": ["Koszt wytworzenia sprzedanych produktów", "E", ""],
+            "711-1": ["Koszt wytworzenia sprzedanych wyrobów gotowych", "E", ""],
+            "711-2": ["Koszt wytworzenia sprzedanych usług", "E", ""],
+            "730": ["Przychody ze sprzedaży towarów", "R", ""],
+            "731": ["Wartość sprzedanych towarów", "E", ""],
+            "750": ["Przychody finansowe", "R", ""],
+            "750-1": ["Dywidendy i udziały w zyskach", "R", ""],
+            "750-2": ["Odsetki", "R", ""],
+            "750-3": ["Przychody z tytułu rozchodu aktywów finansowych", "R", ""],
+            "750-4": ["Aktualizacja wartości aktywów finansowych", "R", ""],
+            "750-6": ["Inne przychody finansowe", "R", ""],
+            "751": ["Koszty finansowe", "E", ""],
+            "751-1": ["Odsetki", "E", ""],
+            "751-2": ["Koszty z tytułu rozchodu aktywów finansowych", "E", ""],
+            "751-3": ["Aktualizacja wartości aktywów finansowych", "E", ""],
+            "751-5": ["Inne koszty finansowe", "E", ""],
+            "760": ["Pozostałe przychody operacyjne", "R", ""],
+            "760-1": ["Przychody z tytułu rozchodu niefinansowych aktywów trwałych", "R", ""],
+            "760-3": ["Aktualizacja wartości aktywów niefinansowych", "R", ""],
+            "760-4": ["Inne pozostałe przychody operacyjne", "R", ""],
+            "761": ["Pozostałe koszty operacyjne", "E", ""],
+            "761-1": ["Koszty z tytułu rozchodu niefinansowych aktywów trwałych", "E", ""],
+            "761-2": ["Aktualizacja wartości aktywów niefinansowych", "E", ""],
+            "761-3": ["Inne pozostałe koszty operacyjne", "E", ""],
+            "800": ["Kapitał (fundusz) podstawowy", "P", "pa_a_i"],
+            "811": ["Kapitał (fundusz) zapasowy", "P", "pa_a_ii_1"],
+            "812": ["Pozostałe kapitały (fundusze) rezerwowe", "P", "pa_a_iv"],
+            "813": ["Kapitał (fundusz) z aktualizacji wyceny", "P", "pa_a_iii_1"],
+            "820": ["Rozliczenie wyniku finansowego", "P", "pa_a_v"],
+            "830": ["Rezerwy na zobowiązania", "P", "pa_b_i_1"],
+            "840": ["Rozliczenia międzyokresowe przychodów", "P", "pa_b_iv"],
+            "850": ["Fundusze specjalne", "P", "pa_b_iii_c"],
+            "860": ["Wynik finansowy", "P", "pa_a_vi"],
+            "870": ["Podatek dochodowy i inne obowiązkowe obciążenia wyniku finansowego", "E", ""]
+        }
 
-<script>
-  function zamknijKonto() {
-    // 1. Zliczanie obrotów Dt
-    const dtValues = document.querySelectorAll('#dt-list .dt-val');
-    let sumDt = 0;
-    dtValues.forEach(el => {
-      sumDt += parseFloat(el.textContent) || 0;
-    });
+        GROUP_NAMES = {
+            "0": "Zespół 0 - Aktywa trwałe",
+            "1": "Zespół 1 - Inwestycje krótkoterminowe, kredyty oraz udziały własne",
+            "2": "Zespół 2 - Rozrachunki i roszczenia",
+            "3": "Zespół 3 - Materiały, towary i rozliczenie zakupu",
+            "4": "Zespół 4 - Koszty w układzie rodzajowym (wg rodzajów) i ich rozliczenie",
+            "5": "Zespół 5 - Koszty w układzie kalkulacyjnym (funkcjonalnym)",
+            "6": "Zespół 6 - Produkty i rozliczenia międzyokresowe",
+            "7": "Zespół 7 - Przychody i koszty związane z ich osiągnięciem",
+            "8": "Zespół 8 - Kapitały własne, fundusze specjalne i wynik finansowy"
+        }
 
-    // 2. Zliczanie obrotów Ct
-    const ctValues = document.querySelectorAll('#ct-list .ct-val');
-    let sumCt = 0;
-    ctValues.forEach(el => {
-      sumCt += parseFloat(el.textContent) || 0;
-    });
+        def populate_select(select_id, search_term=""):
+            search_term = search_term.lower()
+            sel = js.document.getElementById(select_id)
+            html = ""
+            current_group = ""
+            
+            has_subaccounts = set()
+            for code in CHART_OF_ACCOUNTS.keys():
+                if "-" in code:
+                    parent_code = code.split("-")[0]
+                    has_subaccounts.add(parent_code)
+                    
+            if select_id.startswith("j_acc"):
+                html += "<option value=''>-- Brak / Nie dotyczy --</option>"
+            
+            for code, data in CHART_OF_ACCOUNTS.items():
+                display_text = f"{code} {data[0]}"
+                if search_term and search_term not in display_text.lower():
+                    continue
+                group_prefix = code[0]
+                group_name = GROUP_NAMES.get(group_prefix, f"Zespół {group_prefix}")
+                
+                if group_name != current_group:
+                    if current_group != "": html += "</optgroup>"
+                    html += f"<optgroup label='{group_name}'>"
+                    current_group = group_name
+                
+                disabled = "disabled" if code in has_subaccounts else ""
+                html += f"<option value='{code}' {disabled}>{display_text}</option>"
+                
+            if current_group != "": html += "</optgroup>"
+            sel.innerHTML = html
 
-    // 3. Wpisanie zsumowanych obrotów do widoku
-    document.getElementById('dt-obroty').textContent = sumDt;
-    document.getElementById('ct-obroty').textContent = sumCt;
-  }
-</script>
+        def filter_accounts(e): 
+            populate_select("t_account_select", js.document.getElementById("account_search").value)
+            
+        def filter_j(e):
+            select_id = e.target.id.replace("search", "acc")
+            populate_select(select_id, e.target.value)
 
+        def handle_enter_t(e):
+            if e.key == "Enter":
+                e.preventDefault()
+                sel = js.document.getElementById("t_account_select")
+                for i in range(sel.options.length):
+                    opt = sel.options.item(i)
+                    if opt.value and not opt.disabled:
+                        sel.value = opt.value
+                        break
+
+        def handle_enter_j(e):
+            if e.key == "Enter":
+                e.preventDefault()
+                select_id = e.target.id.replace("search", "acc")
+                sel = js.document.getElementById(select_id)
+                for i in range(sel.options.length):
+                    opt = sel.options.item(i)
+                    if opt.value and not opt.disabled:
+                        sel.value = opt.value
+                        break
+
+        populate_select("t_account_select")
+        for i in range(1, 5):
+            populate_select(f"j_acc_wn_{i}")
+            populate_select(f"j_acc_ma_{i}")
+
+        def fmt_pln(val):
+            if val == 0: return "0"
+            s = f"{val:,.2f}"
+            return s.replace(",", "X").replace(".", ",").replace("X", " ")
+
+        def parse_pln(val_str):
+            if not val_str: return 0.0
+            val_str = str(val_str).replace(" ", "").replace(",", ".")
+            return float(val_str)
+
+        def complex_sort_key(s):
+            s_str = str(s).strip().lower()
+            if s_str in ['sp', 'bo']:
+                return (0, [])
+            parts = []
+            for text in re.split('([0-9]+)', str(s)):
+                if text.isdigit(): parts.append(int(text))
+                elif text: parts.append(text.lower())
+            return (1, parts)
+
+        def is_wynikowe(code):
+            return code.startswith('4') or code.startswith('5') or code.startswith('7') or code == '870'
+
+        # ZMIENNE STANU
+        t_accounts_store = {}
+        journal_store = []
+
+        # --- LOGIKA ZAMYKANIA KONT ---
+        def toggle_close(code):
+            if code not in t_accounts_store:
+                t_accounts_store[code] = {"wn": [], "ma": [], "closed": False, "closing_data": {"ow":"", "om":"", "sw":"", "sm":"", "cw":"", "cm":""}}
+            t_accounts_store[code]["closed"] = not t_accounts_store[code].get("closed", False)
+            render_t_accounts()
+
+        def update_closing(code, field, value):
+            if code not in t_accounts_store:
+                t_accounts_store[code] = {"wn": [], "ma": [], "closed": True, "closing_data": {"ow":"", "om":"", "sw":"", "sm":"", "cw":"", "cm":""}}
+            if "closing_data" not in t_accounts_store[code]:
+                t_accounts_store[code]["closing_data"] = {"ow":"", "om":"", "sw":"", "sm":"", "cw":"", "cm":""}
+            t_accounts_store[code]["closing_data"][field] = value
+
+        js.window.toggle_close_py = toggle_close
+        js.window.update_closing_py = update_closing
+
+        # --- GENEROWANIE DANYCH DO WIDOKÓW ---
+        def get_aggregated_data_for_view():
+            agg = {}
+            for code, data in t_accounts_store.items():
+                if code not in agg: 
+                    agg[code] = {
+                        "wn": [], "ma": [], 
+                        "closed": data.get("closed", False), 
+                        "closing_data": data.get("closing_data", {"ow":"", "om":"", "sw":"", "sm":"", "cw":"", "cm":""})
+                    }
+                for i, op in enumerate(data["wn"]):
+                    agg[code]["wn"].append({"op": op["op"], "amt": op["amt"], "type": "t", "idx": i})
+                for i, op in enumerate(data["ma"]):
+                    agg[code]["ma"].append({"op": op["op"], "amt": op["amt"], "type": "t", "idx": i})
+                
+            for i, item in enumerate(journal_store):
+                if item["wn_code"]:
+                    if item["wn_code"] not in agg: 
+                        agg[item["wn_code"]] = {"wn": [], "ma": [], "closed": False, "closing_data": {"ow":"", "om":"", "sw":"", "sm":"", "cw":"", "cm":""}}
+                    agg[item["wn_code"]]["wn"].append({"op": item["no"], "amt": item["amount"], "type": "j", "idx": i})
+                if item["ma_code"]:
+                    if item["ma_code"] not in agg: 
+                        agg[item["ma_code"]] = {"wn": [], "ma": [], "closed": False, "closing_data": {"ow":"", "om":"", "sw":"", "sm":"", "cw":"", "cm":""}}
+                    agg[item["ma_code"]]["ma"].append({"op": item["no"], "amt": item["amount"], "type": "j", "idx": i})
+            
+            for code in agg:
+                agg[code]["wn"].sort(key=lambda x: complex_sort_key(x["op"]))
+                agg[code]["ma"].sort(key=lambda x: complex_sort_key(x["op"]))
+                
+            return agg
+
+        def force_sync_t_accounts(e):
+            render_t_accounts()
+
+        # --- LOGIKA DEKRETACJI (DZIENNIK) ---
+        def add_journal(e):
+            op_no = js.document.getElementById("j_op").value.strip()
+            if not op_no:
+                js.alert("Podaj numer operacji!")
+                return
+            
+            added_any = False
+            for i in range(1, 5):
+                amt_str = js.document.getElementById(f"j_amt_{i}").value
+                wn_code = js.document.getElementById(f"j_acc_wn_{i}").value
+                ma_code = js.document.getElementById(f"j_acc_ma_{i}").value
+                
+                if not amt_str: continue
+                
+                try:
+                    amt = parse_pln(amt_str)
+                    if not wn_code and not ma_code:
+                        js.alert(f"W wierszu {i} zaznacz konto po stronie Wn lub Ma!")
+                        return
+                        
+                    journal_store.append({
+                        "no": op_no,
+                        "amount": amt,
+                        "wn_code": wn_code,
+                        "ma_code": ma_code
+                    })
+                    added_any = True
+                except:
+                    js.alert(f"Niepoprawny format kwoty w wierszu {i}!")
+                    return
+            
+            if added_any:
+                journal_store.sort(key=lambda x: complex_sort_key(x['no']))
+                render_journal()
+                render_t_accounts()
+                
+                js.document.getElementById("j_op").value = ""
+                for i in range(1, 5):
+                    js.document.getElementById(f"j_amt_{i}").value = ""
+                    js.document.getElementById(f"j_acc_wn_{i}").selectedIndex = 0
+                    js.document.getElementById(f"j_acc_ma_{i}").selectedIndex = 0
+                    js.document.getElementById(f"j_search_wn_{i}").value = ""
+                    js.document.getElementById(f"j_search_ma_{i}").value = ""
+                    populate_select(f"j_acc_wn_{i}")
+                    populate_select(f"j_acc_ma_{i}")
+
+        def render_journal():
+            tbody = js.document.getElementById("journal-tbody")
+            html = ""
+            for i, item in enumerate(journal_store):
+                wn_display = f"{item['wn_code']} {CHART_OF_ACCOUNTS[item['wn_code']][0]}" if item['wn_code'] else ""
+                ma_display = f"{item['ma_code']} {CHART_OF_ACCOUNTS[item['ma_code']][0]}" if item['ma_code'] else ""
+                
+                html += f"""
+                <tr>
+                    <td style="text-align:center; font-weight:bold;">{item['no']}</td>
+                    <td class='val'>{fmt_pln(item['amount'])}</td>
+                    <td>{wn_display}</td>
+                    <td>{ma_display}</td>
+                    <td style="text-align:center;">
+                        <button class='edit-btn' onclick="window.edit_journal_py({i})">✎</button>
+                        <button class='delete-btn' onclick="window.del_journal_py({i})">❌</button>
+                    </td>
+                </tr>
+                """
+            tbody.innerHTML = html
+
+        def edit_journal(index):
+            item = journal_store[index]
+            js.document.getElementById("j_op").value = item['no']
+            js.document.getElementById("j_amt_1").value = fmt_pln(item['amount'])
+            js.document.getElementById("j_acc_wn_1").value = item['wn_code']
+            js.document.getElementById("j_acc_ma_1").value = item['ma_code']
+            
+            for i in range(2, 5):
+                js.document.getElementById(f"j_amt_{i}").value = ""
+                js.document.getElementById(f"j_acc_wn_{i}").selectedIndex = 0
+                js.document.getElementById(f"j_acc_ma_{i}").selectedIndex = 0
+                js.document.getElementById(f"j_search_wn_{i}").value = ""
+                js.document.getElementById(f"j_search_ma_{i}").value = ""
+                
+            journal_store.pop(index)
+            render_journal()
+            render_t_accounts()
+            
+        def del_journal(index):
+            if js.confirm("Czy usunąć ten wiersz dekretu? (Zmiana odzwierciedli się na kontach T-owych)"):
+                journal_store.pop(index)
+                render_journal()
+                render_t_accounts()
+
+        js.window.edit_journal_py = edit_journal
+        js.window.del_journal_py = del_journal
+
+        # --- LOGIKA KONT T-OWYCH (WIZUALNA) ---
+        def add_t_account(e):
+            select_elem = js.document.getElementById("t_account_select")
+            if select_elem.selectedIndex == -1: return 
+            code = select_elem.value
+            if not code: return
+            if code not in t_accounts_store:
+                t_accounts_store[code] = {"wn": [], "ma": [], "closed": False, "closing_data": {"ow":"", "om":"", "sw":"", "sm":"", "cw":"", "cm":""}}
+                render_t_accounts()
+            else:
+                js.alert("To konto jest już otwarte na planszy!")
+
+        def add_operation(code, side):
+            op_input = js.document.getElementById(f"op_{side}_{code}").value
+            amt_input = js.document.getElementById(f"amt_{side}_{code}").value
+            if not amt_input: return
+            try:
+                amt = parse_pln(amt_input)
+                op = op_input if op_input else "Sp"
+                if code not in t_accounts_store:
+                    t_accounts_store[code] = {"wn": [], "ma": [], "closed": False, "closing_data": {"ow":"", "om":"", "sw":"", "sm":"", "cw":"", "cm":""}}
+                    
+                t_accounts_store[code][side].append({"op": op, "amt": amt})
+                render_t_accounts()
+            except:
+                js.alert("Niepoprawny format kwoty w operacji.")
+
+        def edit_operation(code, side, idx):
+            op_data = t_accounts_store[code][side][idx]
+            new_amt_str = js.prompt("Wpisz nową kwotę (np. 1 500,50):", fmt_pln(op_data['amt']))
+            if new_amt_str is None: return
+            new_op_str = js.prompt("Wpisz nowy numer operacji:", op_data['op'])
+            if new_op_str is None: return
+            
+            try:
+                amt = parse_pln(new_amt_str)
+                t_accounts_store[code][side][idx] = {"op": new_op_str, "amt": amt}
+                render_t_accounts()
+            except ValueError:
+                js.alert("Niepoprawny format kwoty!")
+
+        def delete_operation(code, side, idx):
+            if js.confirm("Czy usunąć tę pozycję z konta?"):
+                t_accounts_store[code][side].pop(idx)
+                render_t_accounts()
+
+        js.window.add_op_py = add_operation
+        js.window.edit_op_py = edit_operation
+        js.window.del_op_py = delete_operation
+
+        def render_t_accounts():
+            container = js.document.getElementById("t-accounts-container")
+            agg_data = get_aggregated_data_for_view()
+            
+            html_bilansowe = ""
+            html_wynikowe = ""
+            
+            for code in sorted(agg_data.keys()):
+                data = agg_data[code]
+                acc_info = CHART_OF_ACCOUNTS[code]
+                wn_html = ""
+                for x in data['wn']:
+                    if x.get('type') == 't':
+                        actions = f"<span class='op-actions'><button class='op-btn' onclick=\"window.edit_op_py('{code}', 'wn', {x['idx']})\">✎</button><button class='op-btn' onclick=\"window.del_op_py('{code}', 'wn', {x['idx']})\">❌</button></span>"
+                    else:
+                        actions = f"<span class='op-actions dz-badge' title='Operacja z Dziennika. Zmień w tabeli niżej.'>[Dz]</span>"
+                    wn_html += f"<div class='t-row'><span>{x['op']})</span> <span>{fmt_pln(x['amt'])} {actions}</span></div>"
+                
+                ma_html = ""
+                for x in data['ma']:
+                    if x.get('type') == 't':
+                        actions = f"<span class='op-actions'><button class='op-btn' onclick=\"window.del_op_py('{code}', 'ma', {x['idx']})\">❌</button><button class='op-btn' onclick=\"window.edit_op_py('{code}', 'ma', {x['idx']})\">✎</button></span>"
+                    else:
+                        actions = f"<span class='op-actions dz-badge' title='Operacja z Dziennika. Zmień w tabeli niżej.'>[Dz]</span>"
+                    ma_html += f"<div class='t-row'><span>{actions} {fmt_pln(x['amt'])}</span> <span>({x['op']}</span></div>"
+                
+                closing_btn_text = "Odznacz zamknięcie" if data['closed'] else "Zamknij konto (podkreśl)"
+                closing_html = ""
+                
+                if data['closed']:
+                    c_data = data['closing_data']
+                    closing_html = f"""
+                    <div class="t-closing-section">
+                        <div style="border-top: 2px solid black; width: 100%;"></div>
+                        <div class="t-body" style="min-height: auto;">
+                            <div class="t-side t-wn"><input type="text" class="closing-input" placeholder="Obroty Wn" value="{c_data['ow']}" onchange="window.update_closing_py('{code}', 'ow', this.value)"></div>
+                            <div class="t-side"><input type="text" class="closing-input" placeholder="Obroty Ma" value="{c_data['om']}" onchange="window.update_closing_py('{code}', 'om', this.value)"></div>
+                        </div>
+                        <div class="t-body" style="min-height: auto;">
+                            <div class="t-side t-wn"><input type="text" class="closing-input" placeholder="Saldo Wn" value="{c_data['sw']}" onchange="window.update_closing_py('{code}', 'sw', this.value)"></div>
+                            <div class="t-side"><input type="text" class="closing-input" placeholder="Saldo Ma" value="{c_data['sm']}" onchange="window.update_closing_py('{code}', 'sm', this.value)"></div>
+                        </div>
+                        <div style="border-top: 2px solid black; width: 100%;"></div>
+                        <div class="t-body" style="min-height: auto; border-bottom: 4px double black;">
+                            <div class="t-side t-wn"><input type="text" class="closing-input sum-input" placeholder="Suma k. Wn" value="{c_data['cw']}" onchange="window.update_closing_py('{code}', 'cw', this.value)"></div>
+                            <div class="t-side"><input type="text" class="closing-input sum-input" placeholder="Suma k. Ma" value="{c_data['cm']}" onchange="window.update_closing_py('{code}', 'cm', this.value)"></div>
+                        </div>
+                    </div>
+                    """
+
+                footer_html = f"""
+                {closing_html}
+                <div class="t-input-row">
+                    <button class="close-btn" onclick="window.toggle_close_py('{code}')" style="margin-bottom: 5px;">{closing_btn_text}</button>
+                    <div style="display:flex; justify-content: space-between; gap:5px;">
+                        <div style="width:50%; display:flex; flex-direction:column; gap:2px;">
+                            <input type="text" id="op_wn_{code}" placeholder="Nr (np. Sp)">
+                            <input type="text" id="amt_wn_{code}" placeholder="Kwota Dt">
+                            <button onclick="window.add_op_py('{code}', 'wn')" style="padding:4px;">Księguj Dt</button>
+                        </div>
+                        <div style="width:50%; display:flex; flex-direction:column; gap:2px;">
+                            <input type="text" id="op_ma_{code}" placeholder="Nr (np. 1)">
+                            <input type="text" id="amt_ma_{code}" placeholder="Kwota Ct">
+                            <button onclick="window.add_op_py('{code}', 'ma')" style="padding:4px;">Księguj Ct</button>
+                        </div>
+                    </div>
+                </div>
+                """
+
+                acc_html = f"""
+                <div class="t-account">
+                    <div class="t-header">{code} {acc_info[0]}</div>
+                    <div class="t-body">
+                        <div class="t-side t-wn">
+                            {wn_html}
+                        </div>
+                        <div class="t-side">
+                            {ma_html}
+                        </div>
+                    </div>
+                    {footer_html}
+                </div>
+                """
+                
+                if is_wynikowe(code):
+                    html_wynikowe += acc_html
+                else:
+                    html_bilansowe += acc_html
+
+            final_html = ""
+            if html_bilansowe:
+                final_html += f"<div style='width:100%; margin-bottom: 10px;'><h3 style='text-align:center; color:#2980b9; border-bottom: 2px solid #bdc3c7; padding-bottom:5px;'>Konta bilansowe</h3></div>"
+                final_html += html_bilansowe
+            
+            if html_wynikowe:
+                final_html += f"<div style='width:100%; margin-top: 30px; margin-bottom: 10px;'><h3 style='text-align:center; color:#e67e22; border-bottom: 2px solid #bdc3c7; padding-bottom:5px;'>Konta wynikowe</h3></div>"
+                final_html += html_wynikowe
+
+            container.innerHTML = final_html
+    </script>
 </body>
 </html>
